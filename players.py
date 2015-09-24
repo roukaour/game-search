@@ -13,6 +13,7 @@ def run_game(player1, player2, board=None):
 # Evaluation functions
 ##############################################
 
+
 def basic_evaluate(board):
 	"""
 	The original focused-evaluate function from the lab.
@@ -35,14 +36,16 @@ def basic_evaluate(board):
 					score += abs(3-col)
 	return score
 
+
 def new_evaluate(board):
 	# TODO: implement for Assignment 2 Part 2 (20 points)
 	raise NotImplementedError
 
 
 ##############################################
-# Search functions (and utility functions
+# Search functions (and utility functions)
 ##############################################
+
 
 def get_all_next_moves(board):
 	"""
@@ -55,12 +58,14 @@ def get_all_next_moves(board):
 		except InvalidMoveException:
 			pass
 
+
 def is_terminal(depth, board):
 	"""
 	Generic terminal state check, true when maximum depth is reached or
 	the game has ended.
 	"""
 	return depth <= 0 or board.is_game_over()
+
 
 def minimax(board, depth,
 	eval_fn=basic_evaluate,
@@ -79,6 +84,7 @@ def minimax(board, depth,
 	"""
 	# TODO: implement for Assignment 2 Part 1 (20 points)
 	raise NotImplementedError
+
 
 def alpha_beta_search(board, depth,
 	# NOTE: You should use get_next_moves_fn when generating
@@ -101,6 +107,7 @@ def alpha_beta_search(board, depth,
 # Players
 ##############################################
 
+
 def human_player(board):
 	"""A Connect Four player callback that asks the user what to do."""
 	target = None
@@ -117,17 +124,21 @@ def human_player(board):
 			break
 	return target
 
+
 def random_player(board):
 	"""A Connect Four player callback that picks a column at random."""
 	return random.choice([move for move, new_board in get_all_next_moves(board)])
+
 
 def basic_player(board, depth=4, eval_fn=basic_evaluate):
 	"""A Connect Four player callback that calls minimax with basic_evaluate."""
 	return minimax(board, depth=depth, eval_fn=eval_fn)
 
+
 def new_player(board, depth=4, eval_fn=new_evaluate):
 	"""A Connect Four player callback that calls minimax with new_evaluate."""
 	return minimax(board, depth=depth, eval_fn=eval_fn)
+
 
 def alpha_beta_player(board, depth=8, eval_fn=new_evaluate):
 	"""A Connect Four player callback that calls alpha_beta_search with new_evaluate."""
