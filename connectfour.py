@@ -60,7 +60,6 @@ class ConnectFourBoard(object):
 			self._board_array = tuple(map(tuple, board_array))
 		self._current_player = current_player
 		self._chain_length_goal = chain_length_goal
-		self._is_win = self.is_win()
 
 	def __str__(self):
 		"""Return a string representation of this board."""
@@ -161,11 +160,8 @@ class ConnectFourBoard(object):
 		for i in xrange(self.board_height):
 			for j in xrange(self.board_width):
 				cell_player = self.get_cell(i, j)
-				if cell_player:
-					win = self._is_win_from_cell(i, j)
-					if win:
-						self._is_win = win
-						return cell_player
+				if cell_player and self._is_win_from_cell(i, j):
+					return cell_player
 		return 0
 
 	def _is_win_from_cell(self, row, col):
@@ -305,6 +301,7 @@ class ConnectFourRunner(object):
 		"""Return the current game board."""
 		return self._board
 
+	# TODO: modify to return nodesExpanded?
 	def run_game(self, verbose=True):
 		"""
 		Run the test defined by this test runner.
@@ -312,10 +309,7 @@ class ConnectFourRunner(object):
 		"""
 		player1 = (self.player1_callback, 1, self._board.board_symbols[1])
 		player2 = (self.player2_callback, 2, self._board.board_symbols[2])
-
-		win_for_player = []
-
-		while not win_for_player and not self._board.is_tie():
+		while not self._board.is_game_over():
 			for callback, id, symbol in (player1, player2):
 				if verbose:
 					print self._board
@@ -328,21 +322,14 @@ class ConnectFourRunner(object):
 						has_moved = True
 					except InvalidMoveException as ex:
 						print ex
-						print "Illegal move attempted.  Please try again."
+						print "Illegal move attempted. Please try again."
 						continue
 				if self._board.is_game_over():
-					win_for_player = self._board.is_win()
 					break
-
-		win_for_player = self._board.is_win()
-		if win_for_player and self._board.is_tie():
-			print "It's a tie!  No winner is declared."
-			return 0
+		winner = self._board.is_win()
+		if self._board.is_tie():
+			print "It's a tie! No winner is declared."
 		else:
-			self._do_game_end(win_for_player)
-			return win_for_player
-
-	def _do_game_end(self, winner):
-		"""Someone won! Handle this eventuality."""
-		print "Win for %s!" % self._board.board_symbols[winner]
-		print self._board
+			print "Win for %s!" % self._board.board_symbols[winner]
+			print self._board
+		return winner

@@ -130,16 +130,16 @@ def random_player(board):
 	return random.choice([move for move, new_board in get_all_next_moves(board)])
 
 
-def basic_player(board, depth=4, eval_fn=basic_evaluate):
+def basic_player(board):
 	"""A Connect Four player callback that calls minimax with basic_evaluate."""
-	return minimax(board, depth=depth, eval_fn=eval_fn)
+	return minimax(board, depth=4, eval_fn=basic_evaluate)
 
 
-def new_player(board, depth=4, eval_fn=new_evaluate):
+def new_player(board):
 	"""A Connect Four player callback that calls minimax with new_evaluate."""
-	return minimax(board, depth=depth, eval_fn=eval_fn)
+	return minimax(board, depth=4, eval_fn=new_evaluate)
 
 
-def alpha_beta_player(board, depth=8, eval_fn=new_evaluate):
+def alpha_beta_player(board):
 	"""A Connect Four player callback that calls alpha_beta_search with new_evaluate."""
-	return alpha_beta_search(board, depth=depth, eval_fn=eval_fn)
+	return alpha_beta_search(board, depth=4, eval_fn=new_evaluate)
