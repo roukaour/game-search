@@ -14,7 +14,8 @@ class InvalidMoveException(Exception):
 		self._board = board
 
 	def __str__(self):
-		return "InvalidMoveException: Can't add to column %s on board:\n%s" % (str(self._column), str(self._board))
+		return ("InvalidMoveException: Can't add to column %s on board:\n%s" %
+			(str(self._column), str(self._board)))
 
 	def __repr__(self):
 		return str(self)
