@@ -16,7 +16,6 @@ def run_game(player1, player2, board=None):
 def basic_evaluate(board):
 	"""
 	The original focused-evaluate function from the lab.
-	The original is kept because the lab expects the code in the lab to be modified.
 	"""
 	if board.is_game_over():
 		# If the game has been won, we know that it must have been
