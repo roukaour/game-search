@@ -49,9 +49,9 @@ def get_all_next_moves(board):
 	Return a generator of all moves that the current player could take
 	from this position.
 	"""
-	for i in xrange(board.board_width):
+	for column in xrange(board.board_width):
 		try:
-			yield (i, board.do_move(i))
+			yield (column, board.do_move(column))
 		except InvalidMoveException:
 			pass
 
@@ -64,29 +64,7 @@ def is_terminal(depth, board):
 	return depth <= 0 or board.is_game_over()
 
 
-Node = collections.namedtuple('Node', ('score', 'moves'))
-
-
-def get_minimax(board, depth, eval_fn, get_next_moves_fn, is_terminal_fn):
-	if is_terminal_fn(depth, board):
-		return Node(-eval_fn(board), [])
-	if True:
-		values = [Node(get_minimax(child_board, depth-1, eval_fn,
-			get_next_moves_fn, is_terminal_fn), move)
-			for move, child_board in get_next_moves_fn(board)]
-	else:
-		# Debug code
-		# TODO: remove me in final submission
-		values = []
-		for move, child_board in get_next_moves_fn(board):
-			print 'moving', move
-			print child_board
-			submax = get_minimax(child_board, depth-1, eval_fn,
-				get_next_moves_fn, is_terminal_fn)
-			print 'submax', submax
-			values.append(Node(submax, move))
-	max_index = max(values, key=lambda x: x.score.score)
-	return Node(-max_index.score.score, [max_index.moves] + max_index.score.moves)
+Node = collections.namedtuple('Node', ('score', 'column'))
 
 
 def minimax(board, depth,
@@ -104,8 +82,20 @@ def minimax(board, depth,
 	         to a leaf of the tree
 	"""
 	# TODO: implement for Assignment 2 Part 1 (20 points)
-	result = get_minimax(board, depth, eval_fn, get_next_moves_fn, is_terminal_fn)
-	return result.moves[0]
+	node = minimax_helper(board, depth, eval_fn, get_next_moves_fn, is_terminal_fn)
+	return node.column
+
+
+def minimax_helper(board, depth, eval_fn, get_next_moves_fn, is_terminal_fn):
+	if is_terminal_fn(depth, board):
+		return Node(-eval_fn(board), None)
+	child_nodes = []
+	for column, new_board in get_next_moves_fn(board):
+		child_node = minimax_helper(new_board, depth - 1,
+			eval_fn, get_next_moves_fn, is_terminal_fn)
+		child_nodes.append(Node(child_node.score, column))
+	max_child_node = max(child_nodes, key=lambda c: c.score)
+	return Node(-max_child_node.score, max_child_node.column)
 
 
 def alpha_beta_search(board, depth,
