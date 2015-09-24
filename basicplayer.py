@@ -82,11 +82,13 @@ def minimax(board, depth,
 	         to a leaf of the tree
 	"""
 	# TODO: implement for Assignment 2 Part 1 (20 points)
-	node = minimax_helper(board, depth, eval_fn, get_next_moves_fn, is_terminal_fn)
+	node = minimax_helper(board, depth,
+		eval_fn, get_next_moves_fn, is_terminal_fn)
 	return node.column
 
 
-def minimax_helper(board, depth, eval_fn, get_next_moves_fn, is_terminal_fn):
+def minimax_helper(board, depth,
+	eval_fn, get_next_moves_fn, is_terminal_fn):
 	if is_terminal_fn(depth, board):
 		return Node(-eval_fn(board), None)
 	child_nodes = []
@@ -98,21 +100,33 @@ def minimax_helper(board, depth, eval_fn, get_next_moves_fn, is_terminal_fn):
 	return Node(-max_child_node.score, max_child_node.column)
 
 
+infinity = float('inf')
+
+
 def alpha_beta_search(board, depth,
-	# NOTE: You should use get_next_moves_fn when generating
-	# next board configurations, and is_terminal_fn when
-	# checking game termination.
-	# The default functions set here will work
-	# for connect_four.
 	eval_fn=new_evaluate,
 	get_next_moves_fn=get_all_next_moves,
 	is_terminal_fn=is_terminal):
 	# TODO: implement for Assignment 2 Part 3 (30 points)
-	# Write an alpha-beta-search procedure that acts like the minimax-search
-	# procedure, but uses alpha-beta pruning to avoid searching bad ideas
-	# that can't improve the result. The tester will check your pruning by
-	# counting the number of static evaluations you make.
-	raise NotImplementedError
+	node = alpha_beta_helper(board, depth,
+		eval_fn, get_next_moves_fn, is_terminal_fn)
+	return node.column
+
+
+def alpha_beta_helper(board, depth,
+	eval_fn, get_next_moves_fn, is_terminal_fn):
+	print 'explore', board
+	if is_terminal_fn(depth, board):
+		print 'leaf', board
+		return Node(-eval_fn(board), None)
+	child_nodes = []
+	for column, new_board in get_next_moves_fn(board):
+		child_node = minimax_helper(new_board, depth - 1,
+			eval_fn, get_next_moves_fn, is_terminal_fn)
+		child_nodes.append(Node(child_node.score, column))
+	max_child_node = max(child_nodes, key=lambda c: c.score)
+	print 'pick', max_child_node
+	return Node(-max_child_node.score, max_child_node.column)
 
 
 ##############################################
