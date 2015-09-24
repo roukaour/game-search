@@ -12,21 +12,20 @@ def basic_evaluate(board):
 	The original focused-evaluate function from the lab.
 	"""
 	if board.is_game_over():
-		# If the game has been won, we know that it must have been
-		# won or ended by the previous move.
-		# The previous move was made by our opponent.
+		# If the game has been won, we know that it must have been won or ended
+		# by the previous move. The previous move was made by our opponent.
 		# Therefore, we can't have won, so return -1000.
-		# (note that this causes a tie to be treated like a loss)
+		# (Note that this causes a tie to be treated like a loss.)
 		score = -1000
 	else:
 		score = board.longest_chain(board.get_current_player_id()) * 10
 		# Prefer having your pieces in the center of the board.
-		for row in range(6):
-			for col in range(7):
+		for row in xrange(board.board_height):
+			for col in xrange(board.board_width):
 				if board.get_cell(row, col) == board.get_current_player_id():
-					score -= abs(3-col)
+					score -= abs(board.board_width // 2 - col)
 				elif board.get_cell(row, col) == board.get_other_player_id():
-					score += abs(3-col)
+					score += abs(board.board_width // 2 - col)
 	return score
 
 

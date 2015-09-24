@@ -28,7 +28,7 @@ if __name__ == '__main__':
 	print
 
 	# This is for testing; TODO: remove from final submission
-	board = ConnectFourBoard(chain_length_goal=4)
+	board = ConnectFourBoard(chain_length_goal=4, longest_streak_to_win=True)
 	run_game(random_player, human_player, board)
 	exit(0)
 
