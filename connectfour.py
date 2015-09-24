@@ -1,5 +1,6 @@
 
 numNodesExpanded = 0
+directions = [(1, 0), (0, 1), (1, 1), (1, -1)]
 
 class InvalidMoveException(Exception):
 	"""Exception raised if someone tries to make an invalid move."""
@@ -45,7 +46,7 @@ class ConnectFourBoard(object):
 	board_symbols = ['.', 'X', 'O']
 
 	def __init__(self, board_array=None, current_player=1,
-		chain_length_goal=4):
+		chain_length_goal=4, longest_streak_to_win=False):
 		"""
 		Create a new ConnectFourBoard.
 
@@ -63,6 +64,7 @@ class ConnectFourBoard(object):
 			self._board_array = tuple(map(tuple, board_array))
 		self._current_player = current_player
 		self._chain_length_goal = chain_length_goal
+		self._longest_streak_to_win = longest_streak_to_win
 
 	def __str__(self):
 		"""Return a string representation of this board."""
@@ -83,17 +85,11 @@ class ConnectFourBoard(object):
 		""" Determine whether two boards are equal. """
 		return self._board_array == other._board_array
 
-	def current_player(self):
+	def get_current_player_id(self):
 		"""Return the ID of the player who should be moving now."""
 		return self._current_player
 
-	def get_current_player_id(self):
-		return self.current_player()
-
-	def get_other_player_id(self):
-		return self.opponent_player()
-
-	def opponent_player(self):
+	def get_opposite_player_id(self):
 		"""Return the ID of the opponent of the player who should be moving now."""
 		return 2 if self._current_player == 1 else 1
 
@@ -142,7 +138,7 @@ class ConnectFourBoard(object):
 		"""
 		Execute the specified move as the specified player.
 		Return a new board with the result.
-		Raise 'InvalidMoveException' if the specified move is invalid.
+		Raise InvalidMoveException if the specified move is invalid.
 		"""
 		global numNodesExpanded
 		numNodesExpanded += 1
@@ -152,14 +148,13 @@ class ConnectFourBoard(object):
 		new_board = self._board_array
 		new_row = (new_board[row][:column] + (self._current_player,) + new_board[row][column+1:],)
 		new_board = new_board[:row] + new_row + new_board[row+1:]
-		return ConnectFourBoard(new_board, self.opponent_player(),
-			self._chain_length_goal)
+		return ConnectFourBoard(new_board, self.get_opposite_player_id(),
+			self._chain_length_goal, self._longest_streak_to_win)
 
 	def clone(self):
 		"""Return a copy of the game board."""
-		res = ConnectFourBoard(self._board_array, self._current_player,
-			self._chain_length_goal)
-		return res
+		return ConnectFourBoard(self._board_array, self._current_player,
+			self._chain_length_goal, self._longest_streak_to_win)
 
 	def is_game_over(self):
 		""" Return True if the game has been won, False otherwise """
@@ -167,9 +162,19 @@ class ConnectFourBoard(object):
 
 	def is_win(self):
 		"""
-		Return the id# of the player who has won this game.
+		Return the ID of the player who has won this game.
 		Return 0 if it has not yet been won.
 		"""
+		if self._longest_streak_to_win:
+			if self.num_tokens_on_board() < 20:
+				return False
+			current_streak = self.longest_chain(self.get_current_player_id())
+			opponent_streak = self.longest_chain(self.get_opposite_player_id())
+			if current_streak > opponent_streak:
+				return self.get_current_player_id()
+			if opponent_streak > current_streak:
+				return self.get_opposite_player_id()
+			return 0
 		for i in xrange(self.board_height):
 			for j in xrange(self.board_width):
 				cell_player = self.get_cell(i, j)
@@ -185,8 +190,39 @@ class ConnectFourBoard(object):
 		return self._max_length_from_cell(row, col) >= self._chain_length_goal
 
 	def is_tie(self):
-		""" Return true iff the game has reached a stalemate """
+		"""
+		Return whether the game has reached a stalemate, assuming that
+		self.is_win() returns False.
+		"""
+		if self._longest_streak_to_win:
+			return self.num_tokens_on_board() == 20
 		return 0 not in self._board_array[0]
+
+	def get_counts(self, i, j, d, player_id):
+		if not (i + d[0] * (self._chain_length_goal-1) in range(self.board_height) and\
+				j + d[1] * (self._chain_length_goal-1) in range(self.board_width)):
+			return 0
+
+		count = 0
+		for k in range(self._chain_length_goal):
+			code = self._board_array[i+d[0]*k][j+d[1]*k]
+			if code == player_id:
+				count += 1
+			elif code == 0:
+				pass
+			else:
+				return 0
+		return count
+
+	def chain_groups(self, player_id):
+		result = {x:0 for x in range(1, self._chain_length_goal)}
+		for i in range(self.board_height):
+			for j in range(self.board_width):
+				for d in directions:
+					count = self.get_counts(i, j, d, player_id)
+					if count:
+						result[count] += 1
+		return result
 
 	def longest_chain(self, player_id):
 		"""
@@ -342,12 +378,12 @@ class ConnectFourRunner(object):
 				if self._board.is_game_over():
 					break
 		winner = self._board.is_win()
-		if self._board.is_tie():
-			print "It's a tie! No winner is declared."
-		else:
+		if winner:
 			print "Win for %s!" % self._board.board_symbols[winner]
+		else:
+			print "It's a tie! No winner is declared."
 		if verbose:
 			print self._board
+			
 		# TODO: return numNodesExpanded?
-
 		return numNodesExpanded

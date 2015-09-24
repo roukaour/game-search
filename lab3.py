@@ -10,8 +10,8 @@ from basicplayer import *
 def run_game(player1, player2, board=None, verbose=True):
 	"""Run a game of Connect Four with the two specified players."""
 	game = ConnectFourRunner(player1, player2, board)
-	res = game.run_game(verbose)
-	return res
+	return game.run_game(verbose)
+
 
 if __name__ == '__main__':
 
@@ -35,19 +35,7 @@ if __name__ == '__main__':
 
 	# New vs. Basic
 	tick = time.clock()
-	nodesExpanded = run_game(basic_player, basic_player) #new_player, basic_player)
-	tock = time.clock()
-	executionTime = tock - tick
-	print "New vs. Basic:"
-	print "Execution Time:", executionTime
-	print "Nodes Expanded:", nodesExpanded
-	print
-	exit(0)
-
-
-	# New vs. Basic
-	tick = time.clock()
-	nodesExpanded = run_game(basic_player, basic_player) #new_player, basic_player)
+	nodesExpanded = run_game(basic_player, basic_player)
 	tock = time.clock()
 	executionTime = tock - tick
 	print "New vs. Basic:"
