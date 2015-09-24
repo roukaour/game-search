@@ -301,7 +301,6 @@ class ConnectFourRunner(object):
 		"""Return the current game board."""
 		return self._board
 
-	# TODO: modify to return nodesExpanded?
 	def run_game(self, verbose=True):
 		"""
 		Run the test defined by this test runner.
@@ -331,5 +330,7 @@ class ConnectFourRunner(object):
 			print "It's a tie! No winner is declared."
 		else:
 			print "Win for %s!" % self._board.board_symbols[winner]
+		if verbose:
 			print self._board
+		# TODO: return nodesExpanded?
 		return winner

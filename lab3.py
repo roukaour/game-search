@@ -6,12 +6,20 @@ import time
 from connectfour import *
 from players import *
 
+
+def run_game(player1, player2, board=None, verbose=True):
+	"""Run a game of Connect Four with the two specified players."""
+	game = ConnectFourRunner(player1, player2, board)
+	return game.run_game(verbose)
+
+
 if __name__ == '__main__':
 
 	# This is for testing; TODO: remove from final submission
 	# Random vs. Random
 	tick = time.clock()
-	nodesExpanded = run_game(random_player, random_player)
+	board = ConnectFourBoard(chain_length_goal=3)
+	nodesExpanded = run_game(random_player, random_player, board)
 	tock = time.clock()
 	executionTime = tock - tick
 	print "Random vs. Random:"

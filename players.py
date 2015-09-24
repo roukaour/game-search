@@ -3,12 +3,6 @@ import random
 from connectfour import *
 
 
-def run_game(player1, player2, board=None):
-	"""Run a game of Connect Four with the two specified players."""
-	game = ConnectFourRunner(player1, player2, board)
-	return game.run_game()
-
-
 ##############################################
 # Evaluation functions
 ##############################################
