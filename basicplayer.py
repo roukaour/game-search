@@ -16,44 +16,26 @@ def basic_evaluate(board):
 		# by the previous move. The previous move was made by our opponent.
 		# Therefore, we can't have won, so return -1000.
 		# (Note that this causes a tie to be treated like a loss.)
-		score = -1000
-	else:
-		score = board.longest_chain(board.get_current_player_id()) * 10
-		# Prefer having your pieces in the center of the board.
-		for row in xrange(board.board_height):
-			for col in xrange(board.board_width):
-				if board.get_cell(row, col) == board.get_current_player_id():
-					score -= abs(board.board_width // 2 - col)
-				elif board.get_cell(row, col) == board.get_opposite_player_id():
-					score += abs(board.board_width // 2 - col)
+		return -1000
+	score = board.longest_chain(board.get_current_player_id()) * 10
+	# Prefer having your pieces in the center of the board.
+	for row in xrange(board.board_height):
+		for col in xrange(board.board_width):
+			if board.get_cell(row, col) == board.get_current_player_id():
+				score -= abs(board.board_width // 2 - col)
+			elif board.get_cell(row, col) == board.get_opposite_player_id():
+				score += abs(board.board_width // 2 - col)
 	return score
 
 
 def new_evaluate(board):
 	# TODO: implement for Assignment 2 Part 2 (20 points)
-
 	if board.is_game_over():
-		# If the game has been won, we know that it must have been won or ended
-		# by the previous move. The previous move was made by our opponent.
-		# Therefore, we can't have won, so return -1000.
-		# (Note that this causes a tie to be treated like a loss.)
-		score = -1000
-	else:
-		my_chain_groups = board.chain_groups(board.get_current_player_id())
-		other_chain_groups = board.chain_groups(board.get_opposite_player_id())
-
-		score = sum([(2**k) * v for k, v in my_chain_groups.items()])
-		score -= sum([(2**k) * v for k, v in other_chain_groups.items()])
-
-		if False:
-			# Prefer having your pieces in the center of the board.
-			for row in xrange(board.board_height):
-				for col in xrange(board.board_width):
-					if board.get_cell(row, col) == board.get_current_player_id():
-						score -= abs(board.board_width // 2 - col)
-					elif board.get_cell(row, col) == board.get_opposite_player_id():
-						score += abs(board.board_width // 2 - col)
-	return score
+		return -1000
+	my_chain_groups = board.chain_groups(board.get_current_player_id())
+	other_chain_groups = board.chain_groups(board.get_opposite_player_id())
+	return (sum(v * 2**k for k, v in my_chain_groups.items()) -
+		sum(v * 2**k for k, v in other_chain_groups.items()))
 
 
 ##############################################
@@ -80,36 +62,33 @@ def is_terminal(depth, board):
 	"""
 	return depth <= 0 or board.is_game_over()
 
+
 def get_minimax(board, depth, eval_fn, get_next_moves_fn, is_terminal_fn):
 	if is_terminal_fn(depth, board):
 		basic_score = eval_fn(board)
-		return -basic_score, []
-
+		return (-basic_score, [])
 	if True:
-		values = [(get_minimax(moved_board, depth-1, eval_fn, get_next_moves_fn, is_terminal_fn), move)\
-				  for move, moved_board in get_next_moves_fn(board)]
+		values = [(get_minimax(child_board, depth-1, eval_fn, get_next_moves_fn,
+			is_terminal_fn), move) for move, child_board in get_next_moves_fn(board)]
 	else:
 		# Debug code
 		# TODO: remove me in final submission
 		values = []
-		for move, moved_board in get_next_moves_fn(board):
+		for move, child_board in get_next_moves_fn(board):
 			print 'moving', move
-			print moved_board
-			submax = get_minimax(moved_board, depth-1, eval_fn, get_next_moves_fn, is_terminal_fn)
+			print child_board
+			submax = get_minimax(child_board, depth-1, eval_fn,
+				get_next_moves_fn, is_terminal_fn)
 			print 'submax', submax
 			values.append((submax, move))
+	max_index = max(values, key=lambda x: x[0][0])
+	return (-max_index[0][0], [max_index[1]] + max_index[0][1])
 
-
-	compare_fn = max
-	max_index = compare_fn(values, key = lambda x: x[0][0])
-
-	return -max_index[0][0], [max_index[1]] + max_index[0][1]
 
 def minimax(board, depth,
 	eval_fn=basic_evaluate,
 	get_next_moves_fn=get_all_next_moves,
-	is_terminal_fn=is_terminal,
-	verbose=True):
+	is_terminal_fn=is_terminal):
 	"""
 	Do a minimax search to the specified depth on the specified board.
 	Return the column that the search finds to add a token to.
@@ -121,7 +100,6 @@ def minimax(board, depth,
 	         to a leaf of the tree
 	"""
 	# TODO: implement for Assignment 2 Part 1 (20 points)
-
 	result = get_minimax(board, depth, eval_fn, get_next_moves_fn, is_terminal_fn)
 	return result[1][0]
 

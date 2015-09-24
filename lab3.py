@@ -16,9 +16,8 @@ def run_game(player1, player2, board=None, verbose=True):
 if __name__ == '__main__':
 
 	# This is for testing; TODO: remove from final submission
-	# Random vs. Random
-	test_random = False
-	if test_random:
+	if False:
+
 		tick = time.clock()
 		board = ConnectFourBoard(chain_length_goal=3)
 		nodesExpanded = run_game(random_player, random_player, board)
@@ -29,7 +28,6 @@ if __name__ == '__main__':
 		print "Nodes Expanded:", nodesExpanded
 		print
 
-		# This is for testing; TODO: remove from final submission
 		board = ConnectFourBoard(chain_length_goal=4)
 		run_game(random_player, human_player, board)
 
@@ -42,6 +40,7 @@ if __name__ == '__main__':
 	print "Execution Time:", executionTime
 	print "Nodes Expanded:", nodesExpanded
 	print
+
 	exit(0)
 
 	# Alpha-Beta vs. Basic
