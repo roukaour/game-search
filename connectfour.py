@@ -42,7 +42,8 @@ class ConnectFourBoard(object):
 	# Map of board ID numbers to display characters used to print the board
 	board_symbols = ['.', 'X', 'O']
 
-	def __init__(self, board_array=None, current_player=1):
+	def __init__(self, board_array=None, current_player=1,
+		chain_length_goal=4):
 		"""
 		Create a new ConnectFourBoard.
 
@@ -59,6 +60,7 @@ class ConnectFourBoard(object):
 			# Make sure we're storing tuples, so that they're immutable
 			self._board_array = tuple(map(tuple, board_array))
 		self._current_player = current_player
+		self._chain_length_goal = chain_length_goal
 		self._is_win = self.is_win()
 
 	def __str__(self):
@@ -140,7 +142,13 @@ class ConnectFourBoard(object):
 		new_board = self._board_array
 		new_row = (new_board[row][:column] + (self._current_player,) + new_board[row][column+1:],)
 		new_board = new_board[:row] + new_row + new_board[row+1:]
-		return ConnectFourBoard(new_board, self.opponent_player())
+		return ConnectFourBoard(new_board, self.opponent_player(),
+			self._chain_length_goal)
+
+	def clone(self):
+		"""Return a copy of the game board."""
+		return ConnectFourBoard(self._board_array, self._current_player,
+			self._chain_length_goal)
 
 	def is_game_over(self):
 		""" Return True if the game has been won, False otherwise """
@@ -166,7 +174,7 @@ class ConnectFourBoard(object):
 		Return whether there is a winning set of four connected nodes
 		containing the specified cell.
 		"""
-		return self._max_length_from_cell(row, col) >= 4
+		return self._max_length_from_cell(row, col) >= self._chain_length_goal
 
 	def is_tie(self):
 		""" Return true iff the game has reached a stalemate """
@@ -284,31 +292,19 @@ class ConnectFourRunner(object):
 
 	The game runner is implemented via callbacks: The two players specify
 	callbacks to be called when it's their turn. The callback is passed two
-	arguments, self and self.get_board(). The function must return a value
-	within the time specified (in seconds) by self.get_time_limit();
-	otherwise the corresponding player will lose!
-
-	The callback functions must return integers corresponding to the columns they want
-	to drop a token into.
+	arguments, self and self.get_board(). The callback functions must return
+	integers corresponding to the columns they want to drop a token into.
 	"""
 
-	def __init__(self, player1_callback, player2_callback,
-		board=None, time_limit=10):
+	def __init__(self, player1_callback, player2_callback, board=None):
 		"""Create a new ConnectFourRunner."""
 		self._board = board or ConnectFourBoard()
-		self._time_limit = time_limit # in seconds
 		self.player1_callback = player1_callback
 		self.player2_callback = player2_callback
 
 	def get_board(self):
 		"""Return the current game board."""
 		return self._board
-
-	def get_time_limit(self):
-		"""
-		Return the time limit (in seconds) for callback functions for this runner.
-		"""
-		return self._time_limit
 
 	def run_game(self, verbose=True):
 		"""
@@ -327,8 +323,7 @@ class ConnectFourRunner(object):
 				has_moved = False
 				while not has_moved:
 					try:
-						clone = ConnectFourBoard(self._board._board_array, self._board._current_player)
-						new_column = callback(clone)
+						new_column = callback(self._board.clone())
 						print "Player %s (%s) puts a token in column %s" % (id, symbol, new_column)
 						self._board = self._board.do_move(new_column)
 						has_moved = True

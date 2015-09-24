@@ -1,49 +1,12 @@
 import random
 
-from connectfour import InvalidMoveException
+from connectfour import *
 
 
 def run_game(player1, player2, board=None):
 	"""Run a game of Connect Four with the two specified players."""
 	game = ConnectFourRunner(player1, player2, board)
 	return game.run_game()
-
-
-##############################################
-# Players
-##############################################
-
-def human_player(board):
-	"""A Connect Four player callback that asks the user what to do."""
-	target = None
-	valid_targets = range(board.board_width)
-	while True:
-		target = raw_input('Pick a column #: --> ')
-		try:
-			target = int(target)
-		except ValueError:
-			target = None
-		if target not in valid_targets:
-			print 'Please specify a valid integer column number'
-		else:
-			break
-	return target
-
-def random_player(board):
-	"""A Connect Four player callback that picks a column at random."""
-	return random.choice([move for move, new_board in get_all_next_moves(board)])
-
-def basic_player(board, depth=4, eval_fn=basic_evaluate):
-	"""A Connect Four player callback that calls minimax with basic_evaluate."""
-	return minimax(board, depth=depth, eval_fn=eval_fn)
-
-def new_player(board, depth=4, eval_fn=new_evaluate):
-	"""A Connect Four player callback that calls minimax with new_evaluate."""
-	return minimax(board, depth=depth, eval_fn=eval_fn)
-
-def alpha_beta_player(board, depth=8, eval_fn=new_evaluate):
-	"""A Connect Four player callback that calls alpha_beta_search with new_evaluate."""
-	return alpha_beta_search(board, depth=depth, eval_fn=eval_fn)
 
 
 ##############################################
@@ -133,3 +96,40 @@ def alpha_beta_search(board, depth,
 	# that can't improve the result. The tester will check your pruning by
 	# counting the number of static evaluations you make.
 	raise NotImplementedError
+
+
+##############################################
+# Players
+##############################################
+
+def human_player(board):
+	"""A Connect Four player callback that asks the user what to do."""
+	target = None
+	valid_targets = range(board.board_width)
+	while True:
+		target = raw_input('Pick a column #: --> ')
+		try:
+			target = int(target)
+		except ValueError:
+			target = None
+		if target not in valid_targets:
+			print 'Please specify a valid integer column number'
+		else:
+			break
+	return target
+
+def random_player(board):
+	"""A Connect Four player callback that picks a column at random."""
+	return random.choice([move for move, new_board in get_all_next_moves(board)])
+
+def basic_player(board, depth=4, eval_fn=basic_evaluate):
+	"""A Connect Four player callback that calls minimax with basic_evaluate."""
+	return minimax(board, depth=depth, eval_fn=eval_fn)
+
+def new_player(board, depth=4, eval_fn=new_evaluate):
+	"""A Connect Four player callback that calls minimax with new_evaluate."""
+	return minimax(board, depth=depth, eval_fn=eval_fn)
+
+def alpha_beta_player(board, depth=8, eval_fn=new_evaluate):
+	"""A Connect Four player callback that calls alpha_beta_search with new_evaluate."""
+	return alpha_beta_search(board, depth=depth, eval_fn=eval_fn)

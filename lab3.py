@@ -3,7 +3,8 @@
 # Email: remy.oukaour@gmail.com, swordyoung@gmail.com
 
 from connectfour import *
-from basicplayer import *
+from players import *
 
 # Play a game with random going first and human going second
-run_game(random_player, human_player)
+board = ConnectFourBoard(chain_length_goal=3)
+run_game(random_player, human_player, board)
