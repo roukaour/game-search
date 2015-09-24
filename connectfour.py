@@ -1,3 +1,7 @@
+
+numNodesExpanded = 0
+directions = [(1, 0), (0, 1), (1, 1), (1, -1)]
+
 class InvalidMoveException(Exception):
 	"""Exception raised if someone tries to make an invalid move."""
 
@@ -130,6 +134,7 @@ class ConnectFourBoard(object):
 		Return the ID of the player owning the token in the specified cell.
 		Return 0 if it is unclaimed.
 		"""
+		assert(row < len(self._board_array) and col < len(self._board_array[0]))
 		return self._board_array[row][col]
 
 	def do_move(self, column):
@@ -138,6 +143,8 @@ class ConnectFourBoard(object):
 		Return a new board with the result.
 		Raise InvalidMoveException if the specified move is invalid.
 		"""
+		global numNodesExpanded
+		numNodesExpanded += 1
 		row = self.get_top_of_column(column)
 		if row < 0:
 			raise InvalidMoveException(column, self)
@@ -194,6 +201,32 @@ class ConnectFourBoard(object):
 		if self._longest_streak_to_win:
 			return self.num_tokens_on_board() == 20
 		return 0 not in self._board_array[0]
+
+	def get_counts(self, i, j, d, player_id):
+		if not (i + d[0] * (self._chain_length_goal-1) in range(self.board_height) and\
+				j + d[1] * (self._chain_length_goal-1) in range(self.board_width)):
+			return 0
+
+		count = 0
+		for k in range(self._chain_length_goal):
+			code = self._board_array[i+d[0]*k][j+d[1]*k]
+			if code == player_id:
+				count += 1
+			elif code == 0:
+				pass
+			else:
+				return 0
+		return count
+
+	def chain_groups(self, player_id):
+		result = {x:0 for x in range(1, self._chain_length_goal)}
+		for i in range(self.board_height):
+			for j in range(self.board_width):
+				for d in directions:
+					count = self.get_counts(i, j, d, player_id)
+					if count:
+						result[count] += 1
+		return result
 
 	def longest_chain(self, player_id):
 		"""
@@ -315,6 +348,9 @@ class ConnectFourRunner(object):
 		self.player1_callback = player1_callback
 		self.player2_callback = player2_callback
 
+		global numNodesExpanded
+		numNodesExpanded = 0
+
 	def get_board(self):
 		"""Return the current game board."""
 		return self._board
@@ -349,5 +385,6 @@ class ConnectFourRunner(object):
 			print "It's a tie! No winner is declared."
 		if verbose:
 			print self._board
-		# TODO: return nodesExpanded?
-		return winner
+			
+		# TODO: return numNodesExpanded?
+		return numNodesExpanded
