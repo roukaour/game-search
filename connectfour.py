@@ -197,14 +197,13 @@ class ConnectFourBoard(object):
 			return self.num_tokens_on_board() == 20
 		return 0 not in self._board_array[0]
 
-	def get_counts(self, i, j, d, player_id):
-		if not (i + d[0] * (self._chain_length_goal-1) in range(self.board_height) and\
-				j + d[1] * (self._chain_length_goal-1) in range(self.board_width)):
+	def get_counts(self, row, col, dir, player_id):
+		if not (row + dir[0] * (self._chain_length_goal - 1) in xrange(self.board_height) and
+				col + dir[1] * (self._chain_length_goal - 1) in xrange(self.board_width)):
 			return 0
-
 		count = 0
 		for k in range(self._chain_length_goal):
-			code = self._board_array[i+d[0]*k][j+d[1]*k]
+			code = self._board_array[row+dir[0]*k][col+dir[1]*k]
 			if code == player_id:
 				count += 1
 			elif code == 0:
@@ -214,11 +213,11 @@ class ConnectFourBoard(object):
 		return count
 
 	def chain_groups(self, player_id):
-		result = {x:0 for x in range(1, self._chain_length_goal)}
-		for i in range(self.board_height):
-			for j in range(self.board_width):
-				for d in [(1, 0), (0, 1), (1, 1), (1, -1)]:
-					count = self.get_counts(i, j, d, player_id)
+		result = {x: 0 for x in xrange(1, self._chain_length_goal)}
+		for row in range(self.board_height):
+			for col in range(self.board_width):
+				for dir in [(1, 0), (0, 1), (1, 1), (1, -1)]:
+					count = self.get_counts(row, col, dir, player_id)
 					if count:
 						result[count] += 1
 		return result
