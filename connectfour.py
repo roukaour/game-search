@@ -197,7 +197,17 @@ class ConnectFourBoard(object):
 			return self.num_tokens_on_board() == 20
 		return 0 not in self._board_array[0]
 
-	def get_counts(self, row, col, dir, player_id):
+	def chain_groups(self, player_id):
+		result = {x: 0 for x in xrange(1, self._chain_length_goal)}
+		for row in range(self.board_height):
+			for col in range(self.board_width):
+				for dir in [(1, 0), (0, 1), (1, 1), (1, -1)]:
+					count = self._get_counts(row, col, dir, player_id)
+					if count:
+						result[count] += 1
+		return result
+
+	def _get_counts(self, row, col, dir, player_id):
 		if not (row + dir[0] * (self._chain_length_goal - 1) in xrange(self.board_height) and
 				col + dir[1] * (self._chain_length_goal - 1) in xrange(self.board_width)):
 			return 0
@@ -211,16 +221,6 @@ class ConnectFourBoard(object):
 			else:
 				return 0
 		return count
-
-	def chain_groups(self, player_id):
-		result = {x: 0 for x in xrange(1, self._chain_length_goal)}
-		for row in range(self.board_height):
-			for col in range(self.board_width):
-				for dir in [(1, 0), (0, 1), (1, 1), (1, -1)]:
-					count = self.get_counts(row, col, dir, player_id)
-					if count:
-						result[count] += 1
-		return result
 
 	def longest_chain(self, player_id):
 		"""
