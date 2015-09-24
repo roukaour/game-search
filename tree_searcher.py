@@ -45,7 +45,8 @@
 #                       get_next_moves_fn=get_all_next_moves,
 #                       is_terminal_fn=<your_terminal_function>):
 
-from lab3 import alpha_beta_search
+from lab3 import minimax as search
+#from lab3 import alpha_beta_search as search
 
 class Node:
 	"""
@@ -153,86 +154,78 @@ def tree_eval(node):
 	else:
 		return None
 
-def TEST_1(expected):
-	tup_tree = ('A', None,
-		('B', None,
-			('C', None,
-				('D', 2),
-				('E', 2)),
-			('F', None,
-				('G', 0),
-				('H', 4))),
-		('I', None,
-			('J', None,
-				('K', 6),
-				('L', 8)
-			),
-			('M', None,
-				('N', 4),
-				('O', 6))))
+def test_tree(name, expected, tup_tree):
 	tree = make_tree(tup_tree)
-	print '%s:\n%s' % ('TREE_1', tree_as_string(tree))
-	v = alpha_beta_search(tree, 10, tree_eval, tree_get_next_move, is_leaf)
+	print name + ':'
+	print
+	print tree_as_string(tree)
+	v = search(tree, 10, tree_eval, tree_get_next_move, is_leaf)
 	print 'BEST MOVE:', v
 	print 'EXPECTED:', expected
+	print
 
-def TEST_2(expected):
-	tup_tree = ('A', None,
-		('B', None,
-			('C', None,
-				('D', 6),
-				('E', 4)),
-			('F', None,
-				('G', 8),
-				('H', 6))),
-		('I', None,
-			('J', None,
-				('K', 4),
-				('L', 0)),
-			('M', None,
-				('N', 2),
-				('O', 2))))
-	tree = make_tree(tup_tree)
-	print '%s:\n%s' % ('TREE_2', tree_as_string(tree))
-	v = alpha_beta_search(tree, 10, tree_eval, tree_get_next_move, is_leaf)
-	print 'BEST MOVE:', v
-	print 'EXPECTED:', expected
-
-def TEST_3(expected):
-	tup_tree = ('A', None,
-		('B', None,
-			('E', None,
-				('K', 8),
-				('L', 2)),
-			('F', 6)),
-		('C', None,
-			('G', None,
-				('M', None,
-					('S', 4),
-					('T', 5)),
-				('N', 3)),
-			('H', None,
-				('O', 9),
-				('P', None,
-					('U', 10),
-					('V', 8)))),
-		('D', None,
-			('I', 1),
-			('J', None,
-				('Q', None,
-					('W', 7),
-					('X', 12)),
-				('K', None,
-					('Y', 11),
-					('Z', 15)))))
-	tree = make_tree(tup_tree)
-	print '%s:\n%s' % ('TREE_3', tree_as_string(tree))
-	v = alpha_beta_search(tree, 10, tree_eval, tree_get_next_move, is_leaf)
-	print 'BEST MOVE:', v
-	print 'EXPECTED:', expected
-
+# Run basic tests using trees.
 if __name__ == '__main__':
-	# Run basic tests using trees.
-	TEST_1('I')
-	TEST_2('B')
-	TEST_3('B')
+
+	test_tree('TREE_1', 'I',
+		('A', None,
+			('B', None,
+				('C', None,
+					('D', 2),
+					('E', 2)),
+				('F', None,
+					('G', 0),
+					('H', 4))),
+			('I', None,
+				('J', None,
+					('K', 6),
+					('L', 8)
+				),
+				('M', None,
+					('N', 4),
+					('O', 6)))))
+
+	test_tree('TREE_2', 'B',
+		('A', None,
+			('B', None,
+				('C', None,
+					('D', 6),
+					('E', 4)),
+				('F', None,
+					('G', 8),
+					('H', 6))),
+			('I', None,
+				('J', None,
+					('K', 4),
+					('L', 0)),
+				('M', None,
+					('N', 2),
+					('O', 2)))))
+
+	test_tree('TREE_3', 'B',
+		('A', None,
+			('B', None,
+				('E', None,
+					('K', 8),
+					('L', 2)),
+				('F', 6)),
+			('C', None,
+				('G', None,
+					('M', None,
+						('S', 4),
+						('T', 5)),
+					('N', 3)),
+				('H', None,
+					('O', 9),
+					('P', None,
+						('U', 10),
+						('V', 8)))),
+			('D', None,
+				('I', 1),
+				('J', None,
+					('Q', None,
+						('W', 7),
+						('X', 12)),
+					('K', None,
+						('Y', 11),
+						('Z', 15))))))
