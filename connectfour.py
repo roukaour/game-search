@@ -1,7 +1,3 @@
-
-numNodesExpanded = 0
-directions = [(1, 0), (0, 1), (1, 1), (1, -1)]
-
 class InvalidMoveException(Exception):
 	"""Exception raised if someone tries to make an invalid move."""
 
@@ -144,8 +140,6 @@ class ConnectFourBoard(object):
 		Return a new board with the result.
 		Raise InvalidMoveException if the specified move is invalid.
 		"""
-		global numNodesExpanded
-		numNodesExpanded += 1
 		row = self.get_top_of_column(column)
 		if row < 0:
 			raise InvalidMoveException(column, self)
@@ -223,7 +217,7 @@ class ConnectFourBoard(object):
 		result = {x:0 for x in range(1, self._chain_length_goal)}
 		for i in range(self.board_height):
 			for j in range(self.board_width):
-				for d in directions:
+				for d in [(1, 0), (0, 1), (1, 1), (1, -1)]:
 					count = self.get_counts(i, j, d, player_id)
 					if count:
 						result[count] += 1
@@ -349,9 +343,6 @@ class ConnectFourRunner(object):
 		self.player1_callback = player1_callback
 		self.player2_callback = player2_callback
 
-		global numNodesExpanded
-		numNodesExpanded = 0
-
 	def get_board(self):
 		"""Return the current game board."""
 		return self._board
@@ -386,6 +377,5 @@ class ConnectFourRunner(object):
 			print "It's a tie! No winner is declared."
 		if verbose:
 			print self._board
-			
-		# TODO: return numNodesExpanded?
-		return numNodesExpanded
+		# TODO: return numNodesExpanded for player 1 or 2?
+		return 0
