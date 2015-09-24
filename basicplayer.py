@@ -23,6 +23,7 @@ def basic_evaluate(board):
 		# Prefer having your pieces in the center of the board.
 		for row in range(6):
 			for col in range(7):
+				# print  board.get_cell(row, col),  board.get_current_player_id(), board.get_other_player_id()
 				if board.get_cell(row, col) == board.get_current_player_id():
 					score -= abs(3-col)
 				elif board.get_cell(row, col) == board.get_other_player_id():
@@ -59,6 +60,18 @@ def is_terminal(depth, board):
 	"""
 	return depth <= 0 or board.is_game_over()
 
+def get_minimax(board, depth, eval_fn, get_next_moves_fn, is_terminal_fn):
+	if is_terminal_fn(depth, board):
+		basic_score = eval_fn(board)
+		return -basic_score, []
+
+	values = [(get_minimax(moved_board, depth-1, eval_fn, get_next_moves_fn, is_terminal_fn), move)\
+			  for move, moved_board in get_next_moves_fn(board)]
+
+	compare_fn = max # if depth % 2 == 1 else min # max if is_max else min
+	max_index = compare_fn(values, key = lambda x: x[0][0])
+
+	return -max_index[0][0], [max_index[1]] + max_index[0][1]
 
 def minimax(board, depth,
 	eval_fn=basic_evaluate,
@@ -76,7 +89,10 @@ def minimax(board, depth,
 	         to a leaf of the tree
 	"""
 	# TODO: implement for Assignment 2 Part 1 (20 points)
-	raise NotImplementedError
+
+	result = get_minimax(board, depth, eval_fn, get_next_moves_fn, is_terminal_fn, is_max = True)
+	return result[1][0]
+	# raise NotImplementedError
 
 
 def alpha_beta_search(board, depth,

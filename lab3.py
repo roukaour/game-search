@@ -10,37 +10,51 @@ from basicplayer import *
 def run_game(player1, player2, board=None, verbose=True):
 	"""Run a game of Connect Four with the two specified players."""
 	game = ConnectFourRunner(player1, player2, board)
-	return game.run_game(verbose)
-
+	res = game.run_game(verbose)
+	return res
 
 if __name__ == '__main__':
 
 	# This is for testing; TODO: remove from final submission
 	# Random vs. Random
-	tick = time.clock()
-	board = ConnectFourBoard(chain_length_goal=3)
-	nodesExpanded = run_game(random_player, random_player, board)
-	tock = time.clock()
-	executionTime = tock - tick
-	print "Random vs. Random:"
-	print "Execution Time:", executionTime
-	print "Nodes Expanded:", nodesExpanded
-	print
+	test_random = False
+	if test_random:
+		tick = time.clock()
+		board = ConnectFourBoard(chain_length_goal=3)
+		nodesExpanded = run_game(random_player, random_player, board)
+		tock = time.clock()
+		executionTime = tock - tick
+		print "Random vs. Random:"
+		print "Execution Time:", executionTime
+		print "Nodes Expanded:", nodesExpanded
+		print
 
-	# This is for testing; TODO: remove from final submission
-	board = ConnectFourBoard(chain_length_goal=4)
-	run_game(random_player, human_player, board)
-	exit(0)
+		# This is for testing; TODO: remove from final submission
+		board = ConnectFourBoard(chain_length_goal=4)
+		run_game(random_player, human_player, board)
 
 	# New vs. Basic
 	tick = time.clock()
-	nodesExpanded = run_game(new_player, basic_player)
+	nodesExpanded = run_game(basic_player, basic_player) #new_player, basic_player)
 	tock = time.clock()
 	executionTime = tock - tick
 	print "New vs. Basic:"
 	print "Execution Time:", executionTime
 	print "Nodes Expanded:", nodesExpanded
 	print
+	exit(0)
+
+
+	# New vs. Basic
+	tick = time.clock()
+	nodesExpanded = run_game(basic_player, basic_player) #new_player, basic_player)
+	tock = time.clock()
+	executionTime = tock - tick
+	print "New vs. Basic:"
+	print "Execution Time:", executionTime
+	print "Nodes Expanded:", nodesExpanded
+	print
+	exit(0)
 
 	# Alpha-Beta vs. Basic
 	tick = time.clock()

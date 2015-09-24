@@ -1,3 +1,6 @@
+
+numNodesExpanded = 0
+
 class InvalidMoveException(Exception):
 	"""Exception raised if someone tries to make an invalid move."""
 
@@ -84,6 +87,12 @@ class ConnectFourBoard(object):
 		"""Return the ID of the player who should be moving now."""
 		return self._current_player
 
+	def get_current_player_id(self):
+		return self.current_player()
+
+	def get_other_player_id(self):
+		return self.opponent_player()
+
 	def opponent_player(self):
 		"""Return the ID of the opponent of the player who should be moving now."""
 		return 2 if self._current_player == 1 else 1
@@ -126,6 +135,7 @@ class ConnectFourBoard(object):
 		Return the ID of the player owning the token in the specified cell.
 		Return 0 if it is unclaimed.
 		"""
+		assert(row < len(self._board_array) and col < len(self._board_array[0]))
 		return self._board_array[row][col]
 
 	def do_move(self, column):
@@ -134,6 +144,8 @@ class ConnectFourBoard(object):
 		Return a new board with the result.
 		Raise 'InvalidMoveException' if the specified move is invalid.
 		"""
+		global numNodesExpanded
+		numNodesExpanded += 1
 		row = self.get_top_of_column(column)
 		if row < 0:
 			raise InvalidMoveException(column, self)
@@ -145,8 +157,9 @@ class ConnectFourBoard(object):
 
 	def clone(self):
 		"""Return a copy of the game board."""
-		return ConnectFourBoard(self._board_array, self._current_player,
+		res = ConnectFourBoard(self._board_array, self._current_player,
 			self._chain_length_goal)
+		return res
 
 	def is_game_over(self):
 		""" Return True if the game has been won, False otherwise """
@@ -297,6 +310,9 @@ class ConnectFourRunner(object):
 		self.player1_callback = player1_callback
 		self.player2_callback = player2_callback
 
+		global numNodesExpanded
+		numNodesExpanded = 0
+
 	def get_board(self):
 		"""Return the current game board."""
 		return self._board
@@ -332,5 +348,6 @@ class ConnectFourRunner(object):
 			print "Win for %s!" % self._board.board_symbols[winner]
 		if verbose:
 			print self._board
-		# TODO: return nodesExpanded?
-		return winner
+		# TODO: return numNodesExpanded?
+
+		return numNodesExpanded
