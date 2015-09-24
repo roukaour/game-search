@@ -354,8 +354,8 @@ class ConnectFourRunner(object):
 						print "Player %s (%s) puts a token in column %s" % (id, symbol, new_column)
 						self._board = self._board.do_move(new_column)
 						has_moved = True
-					except InvalidMoveException, e:
-						print e
+					except InvalidMoveException as ex:
+						print ex
 						print "Illegal move attempted.  Please try again."
 						continue
 				if self._board.is_game_over():
