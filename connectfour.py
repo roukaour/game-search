@@ -30,7 +30,7 @@ class ConnectFourBoard(object):
 		5 . . . . . . .
 		  0 1 2 3 4 5 6
 
-	Board columns fill from the bottom (ie., row 6).
+	Board columns fill from the bottom (ie., row 5, the sixth row).
 	"""
 
 	# The horizontal width of every board
@@ -48,7 +48,7 @@ class ConnectFourBoard(object):
 
 		If board_array is specified, it should be an MxN matrix of iterables
 		(ideally tuples or lists) that will be used to describe the initial
-		board state.  Each cell should be either 0, meaning unoccupied, or
+		board state. Each cell should be either 0, meaning unoccupied, or
 		N for some integer N corresponding to a player number.
 
 		Valid player numbers are 1 and 2.
@@ -206,11 +206,14 @@ class ConnectFourBoard(object):
 	def _max_length_from_cell(self, row, col):
 		"""Return the max-length chain containing this cell."""
 		return 1 + max(
-			self._contig_vector_length(row, col, (1, 0)) + self._contig_vector_length(row, col, (-1, 0)),
-			self._contig_vector_length(row, col, (0, 1)) + self._contig_vector_length(row, col, (0, -1)),
-			self._contig_vector_length(row, col, (1, 1)) + self._contig_vector_length(row, col, (-1, -1)),
-			self._contig_vector_length(row, col, (1, -1)) + self._contig_vector_length(row, col, (-1, 1))
-		)
+			self._contig_vector_length(row, col, (1, 0)) +
+				self._contig_vector_length(row, col, (-1, 0)),
+			self._contig_vector_length(row, col, (0, 1)) +
+				self._contig_vector_length(row, col, (0, -1)),
+			self._contig_vector_length(row, col, (1, 1)) +
+				self._contig_vector_length(row, col, (-1, -1)),
+			self._contig_vector_length(row, col, (1, -1)) +
+				self._contig_vector_length(row, col, (-1, 1)))
 
 	def _contig_vector_length(self, row, col, dir):
 		"""
@@ -228,32 +231,24 @@ class ConnectFourBoard(object):
 
 	def chain_cells(self, player_id):
 		"""
-		Returns a set of all cells on the board that are part of a chain controlled
-		by the specified player.
+		Return a set of all cells on the board that are part of a chain
+		controlled by the specified player.
 
-		The return value will be a Python set containing tuples of coordinates.
+		The return value will be a set of tuples of coordinates.
 		For example, a return value might look like:
 
-		set([ ( (0,1),(0,2),(0,3) ), ( (0,1),(1,1) ) ])
+		{((0,1),(0,2),(0,3)), ((0,1),(1,1))}
 
-		This would indicate a contiguous string of tokens from (0,1)-(0,3) and (0,1)-(1,1).
+		This would indicate a chain of tokens from (0,1) to (0,3) and
+		(0,1) to (1,1).
 
-		The coordinates within a tuple are weakly ordered: any coordinates that are
-		adjacent in a tuple are also adjacent on the board.
+		The coordinates within a tuple are weakly ordered: any coordinates
+		that are adjacent in a tuple are also adjacent on the board.
 
-		Note that single lone tokens are regarded as chains of length 1.  This is
-		sometimes useful, but sometimes not; however, it's relatively easy to remove
-		such elements via list comprehension or via the built-in Python 'filter' function
-		as follows (for example):
-
-		>>> my_big_chains = filter(lambda x: len(x) > 1, myBoard.chain_cells(playernum))
-
-		Also recall that you can convert this set to a list as follows:
-
-		>>> my_list = list( myBoard.chain_cells(playernum) )
-
-		The return value is provided as a set because sets are unique and unordered,
-		as is this collection of chains.
+		Note that single lone tokens are regarded as chains of length 1. This
+		is sometimes useful, but sometimes not; however, it's relatively easy
+		to remove such elements via a list comprehension or the built-in
+		filter function.
 		"""
 		cells = set()
 		for i in xrange(self.board_height):
@@ -265,11 +260,14 @@ class ConnectFourBoard(object):
 	def _chain_sets_from_cell(self, row, col):
 		""" Return the max-length chain containing this cell """
 		return [tuple(x) for x in [
-			list(reversed(self._contig_vector_cells(row, col, (1, 0)))) + [(row, col)] + self._contig_vector_cells(row, col, (-1, 0)),
-			list(reversed(self._contig_vector_cells(row, col, (0, 1)))) + [(row, col)] + self._contig_vector_cells(row, col, (0, -1)),
-			list(reversed(self._contig_vector_cells(row, col, (1, 1)))) + [(row, col)] + self._contig_vector_cells(row, col, (-1, -1)),
-			list(reversed(self._contig_vector_cells(row, col, (1, -1)))) + [(row, col)] + self._contig_vector_cells(row, col, (-1, 1))
-		]]
+			list(reversed(self._contig_vector_cells(row, col, (1, 0)))) +
+				[(row, col)] + self._contig_vector_cells(row, col, (-1, 0)),
+			list(reversed(self._contig_vector_cells(row, col, (0, 1)))) +
+				[(row, col)] + self._contig_vector_cells(row, col, (0, -1)),
+			list(reversed(self._contig_vector_cells(row, col, (1, 1)))) +
+				[(row, col)] + self._contig_vector_cells(row, col, (-1, -1)),
+			list(reversed(self._contig_vector_cells(row, col, (1, -1)))) +
+				[(row, col)] + self._contig_vector_cells(row, col, (-1, 1))]]
 
 	def _contig_vector_cells(self, row, col, dir):
 		"""
@@ -325,25 +323,24 @@ class ConnectFourRunner(object):
 		player1 = (self.player1_callback, 1, self._board.board_symbols[1])
 		player2 = (self.player2_callback, 2, self._board.board_symbols[2])
 		while not self._board.is_game_over():
-			for callback, id, symbol in (player1, player2):
+			for callback, player_id, symbol in (player1, player2):
 				if verbose:
 					print self._board
-				has_moved = False
-				while not has_moved:
+				while True:
 					try:
 						new_column = callback(self._board.clone())
-						print "Player %s (%s) puts a token in column %s" % (id, symbol, new_column)
+						print ('Player %s (%s) puts a token in column %s' %
+							(player_id, symbol, new_column))
 						self._board = self._board.do_move(new_column)
-						has_moved = True
+						break
 					except InvalidMoveException as ex:
 						print ex
-						print "Illegal move attempted. Please try again."
-						continue
+						print 'Illegal move attempted. Please try again.'
 				if self._board.is_game_over():
 					break
 		winner = self._board.is_win()
 		if winner:
-			print "Win for %s!" % self._board.board_symbols[winner]
+			print 'Win for %s!' % self._board.board_symbols[winner]
 		else:
 			print "It's a tie! No winner is declared."
 		if verbose:
