@@ -1,4 +1,5 @@
 import random
+import collections
 from connectfour import *
 
 
@@ -63,13 +64,16 @@ def is_terminal(depth, board):
 	return depth <= 0 or board.is_game_over()
 
 
+Node = collections.namedtuple('Node', ('score', 'moves'))
+
+
 def get_minimax(board, depth, eval_fn, get_next_moves_fn, is_terminal_fn):
 	if is_terminal_fn(depth, board):
-		basic_score = eval_fn(board)
-		return (-basic_score, [])
+		return Node(-eval_fn(board), [])
 	if True:
-		values = [(get_minimax(child_board, depth-1, eval_fn, get_next_moves_fn,
-			is_terminal_fn), move) for move, child_board in get_next_moves_fn(board)]
+		values = [Node(get_minimax(child_board, depth-1, eval_fn,
+			get_next_moves_fn, is_terminal_fn), move)
+			for move, child_board in get_next_moves_fn(board)]
 	else:
 		# Debug code
 		# TODO: remove me in final submission
@@ -80,9 +84,9 @@ def get_minimax(board, depth, eval_fn, get_next_moves_fn, is_terminal_fn):
 			submax = get_minimax(child_board, depth-1, eval_fn,
 				get_next_moves_fn, is_terminal_fn)
 			print 'submax', submax
-			values.append((submax, move))
-	max_index = max(values, key=lambda x: x[0][0])
-	return (-max_index[0][0], [max_index[1]] + max_index[0][1])
+			values.append(Node(submax, move))
+	max_index = max(values, key=lambda x: x.score.score)
+	return Node(-max_index.score.score, [max_index.moves] + max_index.score.moves)
 
 
 def minimax(board, depth,
@@ -101,7 +105,7 @@ def minimax(board, depth,
 	"""
 	# TODO: implement for Assignment 2 Part 1 (20 points)
 	result = get_minimax(board, depth, eval_fn, get_next_moves_fn, is_terminal_fn)
-	return result[1][0]
+	return result.moves[0]
 
 
 def alpha_beta_search(board, depth,
