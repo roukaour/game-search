@@ -63,22 +63,25 @@ class ConnectFourBoard(object):
 		self._longest_streak_to_win = longest_streak_to_win
 
 	def __str__(self):
-		"""Return a string representation of this board."""
-		retVal = [str(i) + ' ' + ' '.join([self.board_symbols[x] for x in row])
-			for i, row in enumerate(self._board_array)]
-		retVal += ['  ' + ' '.join(str(x) for x in range(self.board_width))]
-		return '\n' + '\n'.join(retVal) + '\n'
+		"""Return a printable string representation of this board."""
+		return '\n%s\n%s\n' % (
+			'\n'.join(str(i) + ' ' + ' '.join(self.board_symbols[t] for t in row)
+				for i, row in enumerate(self._board_array)),
+			'  ' + ' '.join(str(col) for col in xrange(self.board_width)))
 
 	def __repr__(self):
-		""" Return the string representation of a board in the Python shell."""
+		"""Return a string representation of this board."""
 		return str(self)
 
 	def __hash__(self):
-		"""Determine the hash key of a board.  The hash key must be the same on any two identical boards."""
+		"""
+		Return the hash key of a board.
+		The hash key must be the same on any two identical boards.
+		"""
 		return hash(self._board_array)
 
 	def __eq__(self, other):
-		""" Determine whether two boards are equal. """
+		"""Return whether this board is equal to another one."""
 		return self._board_array == other._board_array
 
 	def get_current_player_id(self):
@@ -91,8 +94,8 @@ class ConnectFourBoard(object):
 
 	def num_tokens_on_board(self):
 		"""
-		Returns the total number of tokens (for either player)
-		currently on the board.
+		Returns the total number of tokens (for either player) currently
+		on the board.
 		"""
 		tokens = 0
 		for row in self._board_array:
@@ -103,8 +106,8 @@ class ConnectFourBoard(object):
 
 	def get_top_elt_in_column(self, column):
 		"""
-		Return the ID of the player who put the topmost token in
-		the specified column.
+		Return the ID of the player who put the topmost token in the
+		specified column.
 		Return 0 if the column is empty.
 		"""
 		for row in self._board_array:
@@ -117,9 +120,9 @@ class ConnectFourBoard(object):
 		Return the index of the lowest empty cell in the specified column.
 		Return -1 if the column is full.
 		"""
-		for i in xrange(self.board_height):
-			if self._board_array[i][column]:
-				return i - 1
+		for row in xrange(self.board_height):
+			if self._board_array[row][column]:
+				return row - 1
 		return self.board_height - 1
 
 	def get_cell(self, row, col):
@@ -138,9 +141,10 @@ class ConnectFourBoard(object):
 		row = self.get_top_of_column(column)
 		if row < 0:
 			raise InvalidMoveException(column, self)
-		new_board = self._board_array
-		new_row = (new_board[row][:column] + (self._current_player,) + new_board[row][column+1:],)
-		new_board = new_board[:row] + new_row + new_board[row+1:]
+		old_board = self._board_array
+		old_row = old_board[row]
+		new_row = old_row[:column] + (self._current_player,) + old_row[column+1:]
+		new_board = old_board[:row] + (new_row,) + old_board[row+1:]
 		return ConnectFourBoard(new_board, self.get_opposite_player_id(),
 			self._chain_length_goal, self._longest_streak_to_win)
 
@@ -168,10 +172,10 @@ class ConnectFourBoard(object):
 			if opponent_streak > current_streak:
 				return self.get_opposite_player_id()
 			return 0
-		for i in xrange(self.board_height):
-			for j in xrange(self.board_width):
-				cell_player = self.get_cell(i, j)
-				if cell_player and self._is_win_from_cell(i, j):
+		for row in xrange(self.board_height):
+			for col in xrange(self.board_width):
+				cell_player = self.get_cell(row, col)
+				if cell_player and self._is_win_from_cell(row, col):
 					return cell_player
 		return 0
 
@@ -197,10 +201,10 @@ class ConnectFourBoard(object):
 		0 if the player has no tokens on the board
 		"""
 		longest = 0
-		for i in xrange(self.board_height):
-			for j in xrange(self.board_width):
-				if self.get_cell(i, j) == player_id:
-					longest = max(longest, self._max_length_from_cell(i, j))
+		for row in xrange(self.board_height):
+			for col in xrange(self.board_width):
+				if self.get_cell(row, col) == player_id:
+					longest = max(longest, self._max_length_from_cell(row, col))
 		return longest
 
 	def _max_length_from_cell(self, row, col):
@@ -251,10 +255,10 @@ class ConnectFourBoard(object):
 		filter function.
 		"""
 		cells = set()
-		for i in xrange(self.board_height):
-			for j in xrange(self.board_width):
-				if self.get_cell(i, j) == player_id:
-					cells.update(self._chain_sets_from_cell(i, j))
+		for row in xrange(self.board_height):
+			for col in xrange(self.board_width):
+				if self.get_cell(row, col) == player_id:
+					cells.update(self._chain_sets_from_cell(row, col))
 		return cells
 
 	def _chain_sets_from_cell(self, row, col):

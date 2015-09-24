@@ -103,7 +103,7 @@ def alpha_beta_search(board, depth,
 def human_player(board):
 	"""A Connect Four player callback that asks the user what to do."""
 	target = None
-	valid_targets = range(board.board_width)
+	valid_targets = xrange(board.board_width)
 	while True:
 		target = raw_input('Pick a column #: --> ')
 		try:
