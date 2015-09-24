@@ -4,7 +4,7 @@
 
 import time
 from connectfour import *
-from players import *
+from basicplayer import *
 
 
 def run_game(player1, player2, board=None, verbose=True):
