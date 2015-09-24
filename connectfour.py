@@ -22,14 +22,13 @@ class ConnectFourBoard(object):
 
 	A Connect Four board is an immutable matrix, laid out as follows:
 
-		0 . . . . . . . .
-		1 . . . . . . . .
-		2 . . . . . . . .
-		3 . . . . . . . .
-		4 . . . . . . . .
-		5 . . . . . . . .
-		6 . . . . . . . .
-		  0 1 2 3 4 5 6 7
+		0 . . . . . . .
+		1 . . . . . . .
+		2 . . . . . . .
+		3 . . . . . . .
+		4 . . . . . . .
+		5 . . . . . . .
+		  0 1 2 3 4 5 6
 
 	Board columns fill from the bottom (ie., row 6).
 	"""
