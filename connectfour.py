@@ -13,89 +13,97 @@ class InvalidMoveException(Exception):
 		return "InvalidMoveException: Can't add to column %s on board:\n%s" % (str(self._column), str(self._board))
 
 	def __repr__(self):
-		return self.__str__()
-
-
-class NonexistentMoveException(Exception):
-	""" Raised if you try to request information on a move that does not exist """
-	pass
+		return str(self)
 
 
 class ConnectFourBoard(object):
 	"""
-	Store a Connect-Four Board.
+	Store a Connect Four board.
 
-	Connect-Four boards are intended to be immutable; please don't use
-	Python wizardry to hack/mutate them.  (It won't give you an advantage;
-	it'll just make the tester crash.)
+	A Connect Four board is an immutable matrix, laid out as follows:
 
-	A Connect-Four board is a matrix, laid out as follows:
-
+		0 . . . . . . . .
+		1 . . . . . . . .
+		2 . . . . . . . .
+		3 . . . . . . . .
+		4 . . . . . . . .
+		5 . . . . . . . .
+		6 . . . . . . . .
 		  0 1 2 3 4 5 6 7
-		0 * * * * * * * *
-		1 * * * * * * * *
-		2 * * * * * * * *
-		3 * * * * * * * *
-		4 * * * * * * * *
-		5 * * * * * * * *
-		6 * * * * * * * *
 
 	Board columns fill from the bottom (ie., row 6).
 	"""
 
-	# The horizontal width of the board
+	# The horizontal width of every board
 	board_width = 7
-	# The vertical height of the board
+	# The vertical height of every board
 	board_height = 6
 
 	# Map of board ID numbers to display characters used to print the board
-	board_symbol_mapping = [' ', 'X', 'O']
+	board_symbols = ['.', 'X', 'O']
 
-	def __init__(self,
-		         board_array = None,
-		         board_already_won = None,
-		         modified_column = None,
-		         current_player = 1,
-		         previous_move = -1):
+	def __init__(self, board_array=None, current_player=1):
 		"""
 		Create a new ConnectFourBoard.
 
 		If board_array is specified, it should be an MxN matrix of iterables
-		(ideally tuples or lists), that will be used to describe the initial
-		board state.  Each cell should be either '0', meaning unoccupied, or
+		(ideally tuples or lists) that will be used to describe the initial
+		board state.  Each cell should be either 0, meaning unoccupied, or
 		N for some integer N corresponding to a player number.
 
-		board_already_won can optionally be set to either None, or to the id#
-		of the player who has already won the board.
-		If modified_column is specified, it should be the index of the last
-		column that had a token dropped into it.
-		Both board_already_won and modified_column are used as hints to the
-		'is_win_for_player()' function.  It is fine to not specify them, but
-		if they are specified, they must be correct.
+		Valid player numbers are 1 and 2.
 		"""
 		if not board_array:
 			self._board_array = ((0,) * self.board_width,) * self.board_height
 		else:
 			# Make sure we're storing tuples, so that they're immutable
 			self._board_array = tuple(map(tuple, board_array))
+		self._current_player = current_player
 		self._is_win = self.is_win()
-		self.current_player = current_player
 
-	def get_current_player_id(self):
-		"""Return the id of the player who should be moving now."""
-		return self.current_player
+	def __str__(self):
+		"""Return a string representation of this board."""
+		retVal = [str(i) + ' ' + ' '.join([self.board_symbols[x] for x in row])
+			for i, row in enumerate(self._board_array)]
+		retVal += ['  ' + ' '.join(str(x) for x in range(self.board_width))]
+		return '\n' + '\n'.join(retVal) + '\n'
 
-	def get_other_player_id(self):
-		"""Return the id of the opponent of the player who should be moving now."""
-		return 2 if self.get_current_player_id() == 1 else 1
+	def __repr__(self):
+		""" Return the string representation of a board in the Python shell."""
+		return str(self)
 
-	def get_board_array(self):
-		"""Return the board array representing this board (as a tuple of tuples)."""
-		return self._board_array
+	def __hash__(self):
+		"""Determine the hash key of a board.  The hash key must be the same on any two identical boards."""
+		return hash(self._board_array)
+
+	def __eq__(self, other):
+		""" Determine whether two boards are equal. """
+		return self._board_array == other._board_array
+
+	def current_player(self):
+		"""Return the ID of the player who should be moving now."""
+		return self._current_player
+
+	def opponent_player(self):
+		"""Return the ID of the opponent of the player who should be moving now."""
+		return 2 if self._current_player == 1 else 1
+
+	def num_tokens_on_board(self):
+		"""
+		Returns the total number of tokens (for either player)
+		currently on the board.
+		"""
+		tokens = 0
+		for row in self._board_array:
+			for col in row:
+				if col:
+					tokens += 1
+		return tokens
 
 	def get_top_elt_in_column(self, column):
 		"""
-		Get the id# of the player who put the topmost token in the specified column.
+		Return the ID of the player who put the topmost token in
+		the specified column.
 		Return 0 if the column is empty.
 		"""
 		for row in self._board_array:
@@ -103,19 +111,19 @@ class ConnectFourBoard(object):
 				return row[column]
 		return 0
 
-	def get_height_of_column(self, column):
+	def get_top_of_column(self, column):
 		"""
-		Return the index of the first cell in the specified column that is filled.
-		Return ConnectFourBoard.board_height if the column is empty.
+		Return the index of the lowest empty cell in the specified column.
+		Return -1 if the column is full.
 		"""
 		for i in xrange(self.board_height):
 			if self._board_array[i][column]:
 				return i - 1
-		return self.board_height
+		return self.board_height - 1
 
 	def get_cell(self, row, col):
 		"""
-		Get the id# of the player owning the token in the specified cell.
+		Return the ID of the player owning the token in the specified cell.
 		Return 0 if it is unclaimed.
 		"""
 		return self._board_array[row][col]
@@ -126,43 +134,45 @@ class ConnectFourBoard(object):
 		Return a new board with the result.
 		Raise 'InvalidMoveException' if the specified move is invalid.
 		"""
-		player_id = self.get_current_player_id()
-		if self.get_height_of_column(column) < 0:
+		row = self.get_top_of_column(column)
+		if row < 0:
 			raise InvalidMoveException(column, self)
-		new_board = list(zip(*self.get_board_array()))
-		target_col = [x for x in new_board[column] if x]
-		target_col = [0 for x in xrange(self.board_height - len(target_col) - 1)] + [player_id] + target_col
-		new_board[column] = target_col
-		new_board = zip(*new_board)
-		# Re-immutablize the board
-		new_board = tuple( map(tuple, new_board) )
-		return ConnectFourBoard(new_board, board_already_won=self.is_win(), modified_column=column, current_player = self.get_other_player_id())
+		new_board = self._board_array
+		new_row = (new_board[row][:column] + (self._current_player,) + new_board[row][column+1:],)
+		new_board = new_board[:row] + new_row + new_board[row+1:]
+		return ConnectFourBoard(new_board, self.opponent_player())
+
+	def is_game_over(self):
+		""" Return True if the game has been won, False otherwise """
+		return self.is_win() or self.is_tie()
+
+	def is_win(self):
+		"""
+		Return the id# of the player who has won this game.
+		Return 0 if it has not yet been won.
+		"""
+		for i in xrange(self.board_height):
+			for j in xrange(self.board_width):
+				cell_player = self.get_cell(i, j)
+				if cell_player:
+					win = self._is_win_from_cell(i, j)
+					if win:
+						self._is_win = win
+						return cell_player
+		return 0
 
 	def _is_win_from_cell(self, row, col):
-		"""Determines if there is a winning set of four connected nodes containing the specified cell."""
+		"""
+		Return whether there is a winning set of four connected nodes
+		containing the specified cell.
+		"""
 		return self._max_length_from_cell(row, col) >= 4
 
-	def _max_length_from_cell(self, row, col):
-		""" Return the max-length chain containing this cell """
-		return max(self._contig_vector_length(row, col, (1, 1))  + self._contig_vector_length(row, col, (-1, -1)) + 1,
-		           self._contig_vector_length(row, col, (1, 0))  + self._contig_vector_length(row, col, (-1, 0))  + 1,
-		           self._contig_vector_length(row, col, (0, 1))  + self._contig_vector_length(row, col, (0, -1))  + 1,
-		           self._contig_vector_length(row, col, (-1, 1)) + self._contig_vector_length(row, col, (1, -1))  + 1)
+	def is_tie(self):
+		""" Return true iff the game has reached a stalemate """
+		return 0 not in self._board_array[0]
 
-	def _contig_vector_length(self, row, col, direction):
-		"""
-		Starting in the specified cell and going a step of direction = (row_step, col_step),
-		count how many consecutive cells are owned by the same player as the starting cell.
-		"""
-		count = 0
-		playerid = self.get_cell(row, col)
-		while 0 <= row < self.board_height and 0 <= col < self.board_width and playerid == self.get_cell(row, col):
-			row += direction[0]
-			col += direction[1]
-			count += 1
-		return count - 1
-
-	def longest_chain(self, playerid):
+	def longest_chain(self, player_id):
 		"""
 		Returns the length of the longest chain of tokens controlled by this player,
 		0 if the player has no tokens on the board
@@ -170,33 +180,34 @@ class ConnectFourBoard(object):
 		longest = 0
 		for i in xrange(self.board_height):
 			for j in xrange(self.board_width):
-				if self.get_cell(i,j) == playerid:
+				if self.get_cell(i, j) == player_id:
 					longest = max(longest, self._max_length_from_cell(i, j))
 		return longest
 
-	def _contig_vector_cells(self, row, col, direction):
+	def _max_length_from_cell(self, row, col):
+		"""Return the max-length chain containing this cell."""
+		return 1 + max(
+			self._contig_vector_length(row, col, (1, 0)) + self._contig_vector_length(row, col, (-1, 0)),
+			self._contig_vector_length(row, col, (0, 1)) + self._contig_vector_length(row, col, (0, -1)),
+			self._contig_vector_length(row, col, (1, 1)) + self._contig_vector_length(row, col, (-1, -1)),
+			self._contig_vector_length(row, col, (1, -1)) + self._contig_vector_length(row, col, (-1, 1))
+		)
+
+	def _contig_vector_length(self, row, col, dir):
 		"""
-		Starting in the specified cell and going a step of direction = (row_step, col_step),
+		Starting in the specified cell and going a step of dir = (row_step, col_step),
 		count how many consecutive cells are owned by the same player as the starting cell.
 		"""
-		retVal = []
-		playerid = self.get_cell(row, col)
-		while 0 <= row < self.board_height and 0 <= col < self.board_width and playerid == self.get_cell(row, col):
-			retVal.append((row, col))
-			row += direction[0]
-			col += direction[1]
-		return retVal[1:]
+		count = 0
+		player_id = self.get_cell(row, col)
+		while (0 <= row < self.board_height and 0 <= col < self.board_width and
+			player_id == self.get_cell(row, col)):
+			row += dir[0]
+			col += dir[1]
+			count += 1
+		return count - 1
 
-	def _chain_sets_from_cell(self, row, col):
-		""" Return the max-length chain containing this cell """
-		return [tuple(x) for x in [
-			list(reversed(self._contig_vector_cells(row, col, (1, 1))))  + [(row, col)] + self._contig_vector_cells(row, col, (-1, -1)),
-			list(reversed(self._contig_vector_cells(row, col, (1, 0))))  + [(row, col)] + self._contig_vector_cells(row, col, (-1, 0)),
-			list(reversed(self._contig_vector_cells(row, col, (0, 1))))  + [(row, col)] + self._contig_vector_cells(row, col, (0, -1)),
-			list(reversed(self._contig_vector_cells(row, col, (-1, 1)))) + [(row, col)] + self._contig_vector_cells(row, col, (1, -1))
-		]]
-
-	def chain_cells(self, playerid):
+	def chain_cells(self, player_id):
 		"""
 		Returns a set of all cells on the board that are part of a chain controlled
 		by the specified player.
@@ -225,88 +236,56 @@ class ConnectFourBoard(object):
 		The return value is provided as a set because sets are unique and unordered,
 		as is this collection of chains.
 		"""
-		retVal = set()
+		cells = set()
 		for i in xrange(self.board_height):
 			for j in xrange(self.board_width):
-				if self.get_cell(i, j) == playerid:
-					retVal.update(self._chain_sets_from_cell(i, j))
-		return retVal
+				if self.get_cell(i, j) == player_id:
+					cells.update(self._chain_sets_from_cell(i, j))
+		return cells
 
-	def is_win(self):
+	def _chain_sets_from_cell(self, row, col):
+		""" Return the max-length chain containing this cell """
+		return [tuple(x) for x in [
+			list(reversed(self._contig_vector_cells(row, col, (1, 0)))) + [(row, col)] + self._contig_vector_cells(row, col, (-1, 0)),
+			list(reversed(self._contig_vector_cells(row, col, (0, 1)))) + [(row, col)] + self._contig_vector_cells(row, col, (0, -1)),
+			list(reversed(self._contig_vector_cells(row, col, (1, 1)))) + [(row, col)] + self._contig_vector_cells(row, col, (-1, -1)),
+			list(reversed(self._contig_vector_cells(row, col, (1, -1)))) + [(row, col)] + self._contig_vector_cells(row, col, (-1, 1))
+		]]
+
+	def _contig_vector_cells(self, row, col, dir):
 		"""
-		Return the id# of the player who has won this game.
-		Return 0 if it has not yet been won.
+		Return how many consecutive cells are owned by the same player
+		as the specified starting cell, stepping by dir = (row_step, col_step).
 		"""
-		for i in xrange(self.board_height):
-			for j in xrange(self.board_width):
-				cell_player = self.get_cell(i, j)
-				if cell_player:
-					win = self._is_win_from_cell(i, j)
-					if win:
-						self._is_win = win
-						return cell_player
-		return 0
-
-	def is_game_over(self):
-		""" Return True if the game has been won, False otherwise """
-		return self.is_win() or self.is_tie()
-
-	def is_tie(self):
-		""" Return true iff the game has reached a stalemate """
-		return 0 not in self._board_array[0]
-
-	def clone(self):
-		""" Return a duplicate of this board object """
-		return ConnectFourBoard(self._board_array, board_already_won = self._is_win, current_player = self.get_current_player_id())
-
-	def num_tokens_on_board(self):
-		"""
-		Returns the total number of tokens (for either player)
-		currently on the board.
-		"""
-		tokens = 0
-		for row in self._board_array:
-			for col in row:
-				if col:
-					tokens += 1
-		return tokens
-
-	def __str__(self):
-		"""Return a string representation of this board."""
-		retVal = ['  ' + ' '.join(str(x) for x in range(self.board_width))]
-		retVal += [str(i) + ' ' + ' '.join([self.board_symbol_mapping[x] for x in row]) for i, row in enumerate(self._board_array)]
-		return '\n' + '\n'.join(retVal) + '\n'
-
-	def __repr__(self):
-		""" Return the string representation of a board in the Python shell."""
-		return str(self)
-
-	def __hash__(self):
-		"""Determine the hash key of a board.  The hash key must be the same on any two identical boards."""
-		return hash(self._board_array)
-
-	def __eq__(self, other):
-		""" Determine whether two boards are equal. """
-		return self.get_board_array() == other.get_board_array()
+		cells = []
+		player_id = self.get_cell(row, col)
+		while (0 <= row < self.board_height and 0 <= col < self.board_width and
+			player_id == self.get_cell(row, col)):
+			row += dir[0]
+			col += dir[1]
+			cells.append((row, col))
+		return cells[:-1]
 
 
 class ConnectFourRunner(object):
 	"""
 	Runs a game of Connect Four.
 
-	The rules of this Connect Four game are the same as those for the real Connect Four game:
+	The rules of this Connect Four game are as follows:
 
-	* The game is a two-player game.  Players take turns adding tokens to the board.
+	* The game is a two-player game. Players take turns adding tokens to
+	  the board.
 	* When a token is added to the board, it is added to a particular column.
 	  It "falls" to the unoccupied cell in the column with the largest index.
-	* The game ends when one of the two players has four consecutive tokens in a row
-	  (either horizontally, vertically, or on 45-degree diagonals), or when the board
-	  is completely filled.  If the game ends with a player having four consecutive
-	  diagonal tokens, that player is the winner.
+	* The game ends when one of the two players has four consecutive tokens
+	  in a row (either horizontally, vertically, or on 45-degree diagonals),
+	  or when the board is completely filled. If the game ends with a player
+	  having four consecutive diagonal tokens, that player is the winner.
 
-	The game runner is implemented via callbacks:  The two players specify callbacks to be
-	called when it's their turn.  The callback is passed two arguments, self and self.get_board().
-	The function must return a value within the time specified (in seconds) by self.get_time_limit();
+	The game runner is implemented via callbacks: The two players specify
+	callbacks to be called when it's their turn. The callback is passed two
+	arguments, self and self.get_board(). The function must return a value
+	within the time specified (in seconds) by self.get_time_limit();
 	otherwise the corresponding player will lose!
 
 	The callback functions must return integers corresponding to the columns they want
@@ -314,17 +293,10 @@ class ConnectFourRunner(object):
 	"""
 
 	def __init__(self, player1_callback, player2_callback,
-	             board = ConnectFourBoard(),
-	             time_limit = 10):
-		"""
-		Create a new ConnectFourRunner.
-
-		player1_callback and player2_callback are the callback functions for the two players.
-		board is the initial board to start with, a generic ConnectFourBoard() by default.
-		time_limit is the time (in seconds) allocated per player, 10 seconds by default.
-		"""
-		self._board = board
-		self._time_limit = time_limit # timeout in seconds
+		board=None, time_limit=10):
+		"""Create a new ConnectFourRunner."""
+		self._board = board or ConnectFourBoard()
+		self._time_limit = time_limit # in seconds
 		self.player1_callback = player1_callback
 		self.player2_callback = player2_callback
 
@@ -333,13 +305,18 @@ class ConnectFourRunner(object):
 		return self._board
 
 	def get_time_limit(self):
-		"""Return the time limit (in seconds) for callback functions for this runner."""
+		"""
+		Return the time limit (in seconds) for callback functions for this runner.
+		"""
 		return self._time_limit
 
 	def run_game(self, verbose=True):
-		""" Run the test defined by this test runner. Print and return the id of the winning player."""
-		player1 = (self.player1_callback, 1, self._board.board_symbol_mapping[1])
-		player2 = (self.player2_callback, 2, self._board.board_symbol_mapping[2])
+		"""
+		Run the test defined by this test runner.
+		Print and return the ID of the winning player.
+		"""
+		player1 = (self.player1_callback, 1, self._board.board_symbols[1])
+		player2 = (self.player2_callback, 2, self._board.board_symbols[2])
 
 		win_for_player = []
 
@@ -350,7 +327,8 @@ class ConnectFourRunner(object):
 				has_moved = False
 				while not has_moved:
 					try:
-						new_column = callback(self._board.clone())
+						clone = ConnectFourBoard(self._board._board_array, self._board._current_player)
+						new_column = callback(clone)
 						print "Player %s (%s) puts a token in column %s" % (id, symbol, new_column)
 						self._board = self._board.do_move(new_column)
 						has_moved = True
@@ -367,28 +345,10 @@ class ConnectFourRunner(object):
 			print "It's a tie!  No winner is declared."
 			return 0
 		else:
-			self._do_gameend(win_for_player)
+			self._do_game_end(win_for_player)
 			return win_for_player
 
-	def _do_gameend(self, winner):
+	def _do_game_end(self, winner):
 		"""Someone won! Handle this eventuality."""
-		print "Win for %s!" % self._board.board_symbol_mapping[winner]
+		print "Win for %s!" % self._board.board_symbols[winner]
 		print self._board
-
-
-def human_player(board):
-	"""A callback that asks the user what to do."""
-	target = None
-	while type(target) != int:
-		target = raw_input("Pick a column #: --> ")
-		try:
-			target = int(target)
-		except ValueError:
-			print "Please specify an integer column number"
-	return target
-
-
-def run_game(player1, player2, board = ConnectFourBoard()):
-	"""Run a game of Connect Four, with the two specified players."""
-	game = ConnectFourRunner(player1, player2, board=board)
-	return game.run_game()
