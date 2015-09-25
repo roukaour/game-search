@@ -56,12 +56,11 @@ def get_all_next_moves(board):
 			pass
 
 
-def is_terminal(depth, board):
+def is_terminal(board):
 	"""
-	Generic terminal state check, true when maximum depth is reached or
-	the game has ended.
+	Generic terminal state check, true when the game has ended.
 	"""
-	return depth <= 0 or board.is_game_over()
+	return board.is_game_over()
 
 
 Node = collections.namedtuple('Node', ('score', 'column'))
@@ -89,7 +88,7 @@ def minimax(board, depth,
 
 def minimax_helper(board, depth,
 	eval_fn, get_next_moves_fn, is_terminal_fn):
-	if is_terminal_fn(depth, board):
+	if depth <= 0 or is_terminal_fn(board):
 		return Node(-eval_fn(board), None)
 	child_nodes = []
 	for column, new_board in get_next_moves_fn(board):
@@ -109,24 +108,41 @@ def alpha_beta_search(board, depth,
 	is_terminal_fn=is_terminal):
 	# TODO: implement for Assignment 2 Part 3 (30 points)
 	node = alpha_beta_helper(board, depth,
+		Node(-infinity, None), Node(infinity, None), True,
 		eval_fn, get_next_moves_fn, is_terminal_fn)
 	return node.column
 
 
-def alpha_beta_helper(board, depth,
+def alpha_beta_helper(board, depth, alpha, beta, is_max,
 	eval_fn, get_next_moves_fn, is_terminal_fn):
-	print 'explore', board
-	if is_terminal_fn(depth, board):
-		print 'leaf', board
+	print 'alpha', alpha, 'beta', beta
+	if depth <= 0 or is_terminal_fn(board):
 		return Node(-eval_fn(board), None)
-	child_nodes = []
-	for column, new_board in get_next_moves_fn(board):
-		child_node = minimax_helper(new_board, depth - 1,
-			eval_fn, get_next_moves_fn, is_terminal_fn)
-		child_nodes.append(Node(child_node.score, column))
-	max_child_node = max(child_nodes, key=lambda c: c.score)
-	print 'pick', max_child_node
-	return Node(-max_child_node.score, max_child_node.column)
+	if is_max:
+		v = Node(-infinity, None)
+		for column, new_board in get_next_moves_fn(board):
+			child_node = alpha_beta_helper(new_board, depth - 1,
+				alpha, beta, False, eval_fn, get_next_moves_fn, is_terminal_fn)
+			print 'child_node', child_node
+			v = Node(max(v.score, child_node.score), column)
+			print 'v', v
+			alpha = max(alpha, v)
+			print 'alpha', alpha
+			if beta.score <= alpha.score:
+				break
+	else:
+		v = Node(infinity, None)
+		for column, new_board in get_next_moves_fn(board):
+			child_node = alpha_beta_helper(new_board, depth - 1,
+				alpha, beta, True, eval_fn, get_next_moves_fn, is_terminal_fn)
+			print 'child_node', child_node
+			v = Node(min(v.score, child_node.score), column)
+			print 'v', v
+			beta = min(beta, v)
+			print 'beta', beta
+			if beta.score <= alpha.score:
+				break
+	return Node(-v.score, v.column)
 
 
 ##############################################

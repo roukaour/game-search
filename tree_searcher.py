@@ -45,8 +45,8 @@
 #                       get_next_moves_fn=get_all_next_moves,
 #                       is_terminal_fn=<your_terminal_function>):
 
-from lab3 import minimax as search
-#from lab3 import alpha_beta_search as search
+#from lab3 import minimax as search
+from lab3 import alpha_beta_search as search
 
 class Node:
 	"""
@@ -121,14 +121,7 @@ def make_tree_helper(tup, node_type):
 	n.set_children(children)
 	return n
 
-def is_at_depth(depth, node):
-	"""
-	is_terminal_fn for fixed depth trees
-	True if depth == 0 has been reached.
-	"""
-	return depth <= 0
-
-def is_leaf(depth, node):
+def is_leaf(node):
 	"""
 	is_terminal_fn for variable-depth trees.
 	Check if a node is a leaf node.
