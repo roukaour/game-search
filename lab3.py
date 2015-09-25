@@ -16,20 +16,22 @@ def run_game(player1, player2, board=None, verbose=True):
 if __name__ == '__main__':
 
 	# New vs. Basic
+	minimax_nodesExpanded = 0
 	tick = time.clock()
-	nodesExpanded = run_game(basic_player, basic_player)
+	run_game(new_player, basic_player)
 	tock = time.clock()
 	executionTime = tock - tick
 	print "New vs. Basic:"
 	print "Execution Time:", executionTime
-	print "Nodes Expanded:", nodesExpanded
+	print "Nodes Expanded:", minimax_nodesExpanded
 	print
 
 	# Alpha-Beta vs. Basic
+	alpha_beta_nodesExpanded = 0
 	tick = time.clock()
-	nodesExpanded = run_game(alpha_beta_player, basic_player)
+	run_game(alpha_beta_player, basic_player)
 	tock = time.clock()
 	executionTime = tock - tick
 	print "Alpha-Beta vs. Basic:"
 	print "Execution Time:", executionTime
-	print "Nodes Expanded:", nodesExpanded
+	print "Nodes Expanded:", alpha_beta_nodesExpanded

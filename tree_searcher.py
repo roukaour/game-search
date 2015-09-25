@@ -97,7 +97,10 @@ def test_tree(name, expected, tup_tree):
 	tree_node = make_tree(tup_tree)
 	print name + ':'
 	print tree_node.as_tree_string()
-	best_move = search(tree_node, 10, tree_eval, tree_get_next_moves, is_leaf)
+	best_move = search(tree_node, depth=10, increment=False,
+		eval_fn=tree_eval,
+		get_next_moves_fn=tree_get_next_moves,
+		is_terminal_fn=is_leaf)
 	print 'BEST MOVE:', best_move
 	print 'EXPECTED:', expected
 	print

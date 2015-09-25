@@ -83,7 +83,7 @@ class Node(object):
 	def __str__(self):
 		"""Return a printable string representation of this node."""
 		return 'Node(%s, %d)' % (str(self.score), self.column)
-	
+
 	def __repr__(self):
 		"""Return a string representation of this node."""
 		return str(self)
@@ -93,41 +93,53 @@ class Node(object):
 		return cmp(self.score, other.score) or cmp(self.column, other.column)
 
 
-def minimax(board, depth,
+minimax_nodesExpanded = 0
+
+def minimax(board, depth, increment,
 	eval_fn=basic_evaluate,
 	get_next_moves_fn=get_all_next_moves,
 	is_terminal_fn=is_terminal):
 	"""
 	Do a minimax search on the specified board to the specified depth.
 	Return the column that the search finds to add a token to.
+
+	If increment is True, increment the global variable minimax_nodesExpanded
+	for every node that gets expanded.
 	"""
-	node = minimax_helper(board, depth,
+	node = minimax_helper(board, depth, increment,
 		eval_fn, get_next_moves_fn, is_terminal_fn)
 	return node.column
 
-
-def minimax_helper(board, depth,
+def minimax_helper(board, depth, increment,
 	eval_fn, get_next_moves_fn, is_terminal_fn):
 	"""
 	Do a recursive minimax search on the specified board to the specified depth.
 	Return the node with the best score and the corresponding column move.
-	
+
+	If increment is True, increment the global variable minimax_nodesExpanded
+	for every node that gets expanded.
+
 	Since Connect Four is a zero-sum game, taking the minimum score on alternate
 	levels of the search tree can be replaced by taking the maximum of the
 	negated scores. This variant of minimax is called negamax.
 	"""
+	global minimax_nodesExpanded
+	if increment:
+		minimax_nodesExpanded += 1
 	if depth <= 0 or is_terminal_fn(board):
 		return Node(-eval_fn(board))
 	best_node = Node(-infinity)
 	for column, new_board in get_next_moves_fn(board):
-		child_node = minimax_helper(new_board, depth - 1,
+		child_node = minimax_helper(new_board, depth - 1, increment,
 			eval_fn, get_next_moves_fn, is_terminal_fn)
 		if child_node.score > best_node.score:
 			best_node = Node(child_node.score, column)
 	return Node(-best_node.score, best_node.column)
 
 
-def alpha_beta_search(board, depth,
+alpha_beta_nodesExpanded = 0
+
+def alpha_beta_search(board, depth, increment,
 	eval_fn=new_evaluate,
 	get_next_moves_fn=get_all_next_moves,
 	is_terminal_fn=is_terminal):
@@ -135,25 +147,33 @@ def alpha_beta_search(board, depth,
 	Do a minimax search with alpha-beta pruning on the specified board
 	to the specified depth.
 	Return the column that the search finds to add a token to.
+
+	If increment is True, increment the global variable alpha_beta_nodesExpanded
+	for every node that gets expanded.
 	"""
-	node = alpha_beta_helper(board, depth, -infinity, infinity,
+	node = alpha_beta_helper(board, depth, increment, -infinity, infinity,
 		eval_fn, get_next_moves_fn, is_terminal_fn)
 	return node.column
 
-
-def alpha_beta_helper(board, depth, alpha, beta,
+def alpha_beta_helper(board, depth, increment, alpha, beta,
 	eval_fn, get_next_moves_fn, is_terminal_fn):
 	"""
 	Do a recursive minimax search with alpha-beta pruning on the specified board
 	to the specified depth.
 	Return the column that the search finds to add a token to.
+
+	If increment is True, increment the global variable alpha_beta_nodesExpanded
+	for every node that gets expanded.
 	"""
+	global alpha_beta_nodesExpanded
+	if increment:
+		alpha_beta_nodesExpanded += 1
 	if depth <= 0 or is_terminal_fn(board):
 		return Node(-eval_fn(board))
 	best_node = Node(-infinity)
 	for column, new_board in get_next_moves_fn(board):
-		child_node = alpha_beta_helper(new_board, depth - 1, -beta, -alpha,
-			eval_fn, get_next_moves_fn, is_terminal_fn)
+		child_node = alpha_beta_helper(new_board, depth - 1, increment,
+			-beta, -alpha, eval_fn, get_next_moves_fn, is_terminal_fn)
 		if child_node.score > best_node.score:
 			best_node = Node(child_node.score, column)
 		alpha = max(alpha, best_node.score)
@@ -191,14 +211,14 @@ def random_player(board):
 
 def basic_player(board):
 	"""A Connect Four player callback that calls minimax with basic_evaluate."""
-	return minimax(board, depth=4, eval_fn=basic_evaluate)
+	return minimax(board, depth=4, increment=False, eval_fn=basic_evaluate)
 
 
 def new_player(board):
 	"""A Connect Four player callback that calls minimax with new_evaluate."""
-	return minimax(board, depth=4, eval_fn=new_evaluate)
+	return minimax(board, depth=4, increment=True, eval_fn=new_evaluate)
 
 
 def alpha_beta_player(board):
 	"""A Connect Four player callback that calls alpha_beta_search with new_evaluate."""
-	return alpha_beta_search(board, depth=4, eval_fn=new_evaluate)
+	return alpha_beta_search(board, depth=4, increment=True, eval_fn=new_evaluate)
