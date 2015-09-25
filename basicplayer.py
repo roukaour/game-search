@@ -69,7 +69,7 @@ def is_terminal(board):
 ##############################################
 
 
-infinity = float('inf')
+Infinity = float('inf')
 
 
 class Node(object):
@@ -131,8 +131,8 @@ def minimax_helper(board, depth, increment,
 	if increment:
 		minimax_nodesExpanded += 1
 	if depth <= 0 or is_terminal_fn(board):
-		return Node(-eval_fn(board))
-	best_node = Node(-infinity)
+		return -Node(eval_fn(board))
+	best_node = Node(-Infinity)
 	for column, new_board in get_next_moves_fn(board):
 		child_node = minimax_helper(new_board, depth - 1, increment,
 			eval_fn, get_next_moves_fn, is_terminal_fn)
@@ -155,7 +155,7 @@ def alpha_beta_search(board, depth, increment,
 	If increment is True, increment the global variable alpha_beta_nodesExpanded
 	for every node that gets expanded.
 	"""
-	node = alpha_beta_helper(board, depth, increment, -infinity, infinity,
+	node = alpha_beta_helper(board, depth, increment, -Infinity, Infinity,
 		eval_fn, get_next_moves_fn, is_terminal_fn)
 	return node.column
 
@@ -173,8 +173,8 @@ def alpha_beta_helper(board, depth, increment, alpha, beta,
 	if increment:
 		alpha_beta_nodesExpanded += 1
 	if depth <= 0 or is_terminal_fn(board):
-		return Node(-eval_fn(board))
-	best_node = Node(-infinity)
+		return -Node(eval_fn(board))
+	best_node = Node(-Infinity)
 	for column, new_board in get_next_moves_fn(board):
 		child_node = alpha_beta_helper(new_board, depth - 1, increment,
 			-beta, -alpha, eval_fn, get_next_moves_fn, is_terminal_fn)
