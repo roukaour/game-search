@@ -76,17 +76,107 @@ function and main testing code in \(lab3.py\). (Originally the player callbacks
 were scattered across all three files, and some of them were only needed by
 the MIT assignment. We deleted these to leave only the functions we needed.)
 
-TODO: finish this report.
-
 \subsection{Minimax algorithm}
+
+Since Connect Four is a zero-sum game, we were able to implement a variant of
+minimax called negamax, where taking the minimum utility is replaced by
+taking the maximum negative utility.
+
+\lstset{language=Python}
+\begin{lstlisting}[frame=single]
+minimax_nodesExpanded = 0
+
+def minimax(board, depth, increment,
+	eval_fn=basic_evaluate,
+	get_next_moves_fn=get_all_next_moves,
+	is_terminal_fn=is_terminal):
+	"""
+	Do a minimax search on the specified board to the specified depth.
+	Return the column that the search finds to add a token to.
+	"""
+	node = minimax_helper(board, depth, increment,
+		eval_fn, get_next_moves_fn, is_terminal_fn)
+	return node.column
+
+def minimax_helper(board, depth, increment,
+	eval_fn, get_next_moves_fn, is_terminal_fn):
+	"""
+	Do a recursive minimax search on the specified board
+	to the specified depth.
+	Return the node with the best score and the corresponding column move.
+	"""
+	global minimax_nodesExpanded
+	if increment:
+		minimax_nodesExpanded += 1
+	if depth <= 0 or is_terminal_fn(board):
+		return Node(eval_fn(board))
+	best_node = Node(-Infinity)
+	for column, new_board in get_next_moves_fn(board):
+		child_node = -minimax_helper(new_board, depth - 1, increment,
+			eval_fn, get_next_moves_fn, is_terminal_fn)
+		if child_node > best_node:
+			best_node = Node(child_node.score, column)
+	return best_node
+\end{lstlisting}
 
 \subsubsection{Data structures}
 
-\subsubsection{Utility methods}
+When searching the game tree, each node needs to store its utility score and
+the column to move to reach that node. We created a simple \(Node\) class that
+stores both of these pieces of data.
 
 \subsection{New evaluation function}
 
+TODO
+
 \subsection{Alpha-beta pruning}
+
+Adding alpha-beta pruning to minimax involves changing only a few lines of code.
+Note that since we are using negamax, the algorithm is simplified compared to
+general minimax: we always check \(alpha\), and alternation between \(alpha\)
+and \(beta\) is accomplished by recursing with (-\(beta\), -\(alpha\)) as
+(\(alpha\), \(beta\)).
+
+\lstset{language=Python}
+\begin{lstlisting}[frame=single]
+alpha_beta_nodesExpanded = 0
+
+def alpha_beta_search(board, depth, increment,
+	eval_fn=new_evaluate,
+	get_next_moves_fn=get_all_next_moves,
+	is_terminal_fn=is_terminal):
+	"""
+	Do a minimax search with alpha-beta pruning on the specified board
+	to the specified depth.
+	Return the column that the search finds to add a token to.
+	"""
+	node = alpha_beta_helper(board, depth, increment, -Infinity, Infinity,
+		eval_fn, get_next_moves_fn, is_terminal_fn)
+	return node.column
+
+def alpha_beta_helper(board, depth, increment, alpha, beta,
+	eval_fn, get_next_moves_fn, is_terminal_fn):
+	"""
+	Do a recursive minimax search with alpha-beta pruning
+	on the specified board to the specified depth.
+	Return the column that the search finds to add a token to.
+	"""
+	global alpha_beta_nodesExpanded
+	if increment:
+		alpha_beta_nodesExpanded += 1
+	if depth <= 0 or is_terminal_fn(board):
+		return Node(eval_fn(board))
+	best_node = Node(-Infinity)
+	for column, new_board in get_next_moves_fn(board):
+		child_node = -alpha_beta_helper(new_board, depth - 1, increment,
+			-beta, -alpha, eval_fn, get_next_moves_fn, is_terminal_fn)
+		if child_node > best_node:
+			best_node = Node(child_node.score, column)
+			alpha = max(alpha, best_node.score)
+			if alpha >= beta:
+				break
+	return best_node
+\end{lstlisting}
 
 \subsection{Generalizing the game}
 
