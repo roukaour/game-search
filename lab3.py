@@ -15,6 +15,9 @@ def run_game(player1, player2, board=None, verbose=True):
 
 if __name__ == '__main__':
 
+	#run_game(basicplayer.human_player, basicplayer.alpha_beta_player)
+	#exit(0)
+
 	# New vs. Basic
 	tick = time.clock()
 	run_game(basicplayer.new_player, basicplayer.basic_player)
