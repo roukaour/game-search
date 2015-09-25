@@ -26,7 +26,6 @@ if __name__ == '__main__':
 	print "New vs. Basic:"
 	print "Execution Time:", executionTime
 	print "Nodes Expanded:", basicplayer.minimax_nodesExpanded
-	print
 
 	# Alpha-Beta vs. Basic
 	tick = time.clock()

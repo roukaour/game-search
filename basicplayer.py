@@ -93,7 +93,7 @@ class Node(object):
 
 	def __cmp__(self, other):
 		"""Return the comparison of this node with another one (1, 0, or -1)."""
-		return cmp(self.score, other.score)
+		return cmp(self.score, other.score) or cmp(self.column, other.column)
 
 
 minimax_nodesExpanded = 0
