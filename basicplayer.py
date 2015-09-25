@@ -11,6 +11,7 @@ Infinity = float('inf')
 
 def basic_evaluate(board):
 	"""
+	'eval_fn' for game boards.
 	The original focused-evaluate function from the lab.
 	"""
 	if board.is_game_over():
@@ -32,6 +33,7 @@ def basic_evaluate(board):
 
 def new_evaluate(board):
 	"""
+	'eval_fn' for game boards.
 	TODO: improve this position evaluation function and explain it.
 	"""
 	if board.is_game_over():
@@ -42,6 +44,14 @@ def new_evaluate(board):
 		sum(v * 2**k for k, v in other_chain_groups.items()))
 
 
+def longest_streak_evaluate(board):
+	"""
+	'eval_fn' for game boards.
+	TODO: write this function.
+	"""
+	raise NotImplementedError
+
+
 ##############################################
 # Search utility functions
 ##############################################
@@ -49,6 +59,7 @@ def new_evaluate(board):
 
 def get_all_next_moves(board):
 	"""
+	'get_next_moves_fn' for game boards.
 	Return a generator of all moves that the current player could take
 	from this position.
 	"""
@@ -61,7 +72,8 @@ def get_all_next_moves(board):
 
 def is_terminal(board):
 	"""
-	Generic terminal state check, true when the game has ended.
+	'is_terminal_fn' for game boards.
+	Return whether the game has ended.
 	"""
 	return board.is_game_over()
 
