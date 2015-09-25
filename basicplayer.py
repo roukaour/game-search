@@ -16,9 +16,9 @@ def basic_evaluate(board):
 	if board.is_game_over():
 		# If the game has been won, we know that it must have been won or ended
 		# by the previous move. The previous move was made by our opponent.
-		# Therefore, we can't have won, so return -1000.
+		# Therefore, we can't have won, so return -Infinity.
 		# (Note that this causes a tie to be treated like a loss.)
-		return -1000
+		return -Infinity
 	score = board.longest_chain(board.get_current_player_id()) * 10
 	# Prefer having your pieces in the center of the board
 	for row in xrange(board.board_height):
@@ -35,7 +35,7 @@ def new_evaluate(board):
 	TODO: improve this position evaluation function and explain it.
 	"""
 	if board.is_game_over():
-		return -1000
+		return -Infinity
 	my_chain_groups = board.chain_groups(board.get_current_player_id())
 	other_chain_groups = board.chain_groups(board.get_opposite_player_id())
 	return (sum(v * 2**k for k, v in my_chain_groups.items()) -
@@ -93,7 +93,8 @@ class Node(object):
 
 	def __cmp__(self, other):
 		"""Return the comparison of this node with another one (1, 0, or -1)."""
-		return cmp(self.score, other.score)
+		return cmp(self.score, other.score) or cmp(self.column is not None,
+			other.column is not None)
 
 
 minimax_nodesExpanded = 0
@@ -130,14 +131,14 @@ def minimax_helper(board, depth, increment,
 	if increment:
 		minimax_nodesExpanded += 1
 	if depth <= 0 or is_terminal_fn(board):
-		return -Node(eval_fn(board))
+		return Node(eval_fn(board))
 	best_node = Node(-Infinity)
 	for column, new_board in get_next_moves_fn(board):
-		child_node = minimax_helper(new_board, depth - 1, increment,
+		child_node = -minimax_helper(new_board, depth - 1, increment,
 			eval_fn, get_next_moves_fn, is_terminal_fn)
 		if child_node > best_node:
 			best_node = Node(child_node.score, column)
-	return -best_node
+	return best_node
 
 
 alpha_beta_nodesExpanded = 0
@@ -172,17 +173,17 @@ def alpha_beta_helper(board, depth, increment, alpha, beta,
 	if increment:
 		alpha_beta_nodesExpanded += 1
 	if depth <= 0 or is_terminal_fn(board):
-		return -Node(eval_fn(board))
+		return Node(eval_fn(board))
 	best_node = Node(-Infinity)
 	for column, new_board in get_next_moves_fn(board):
-		child_node = alpha_beta_helper(new_board, depth - 1, increment,
+		child_node = -alpha_beta_helper(new_board, depth - 1, increment,
 			-beta, -alpha, eval_fn, get_next_moves_fn, is_terminal_fn)
 		if child_node > best_node:
 			best_node = Node(child_node.score, column)
-		alpha = max(alpha, best_node.score)
-		if alpha >= beta:
-			break
-	return -best_node
+			alpha = max(alpha, best_node.score)
+			if alpha >= beta:
+				break
+	return best_node
 
 
 ##############################################
