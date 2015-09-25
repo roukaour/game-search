@@ -2,18 +2,17 @@ class InvalidMoveException(Exception):
 	"""Exception raised if someone tries to make an invalid move."""
 
 	def __init__(self, column, board):
-		"""
-		board: the board on which the movement took place
-		column: the column to which an addition was attempted
-		"""
+		"""Initialize this InvalidMoveException."""
 		self._column = column
 		self._board = board
 
 	def __str__(self):
+		"""Return a printable string representation of this exception."""
 		return ("InvalidMoveException: Can't add to column %s on board:\n%s" %
 			(str(self._column), str(self._board)))
 
 	def __repr__(self):
+		"""Return a string representation of this exception."""
 		return str(self)
 
 

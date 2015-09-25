@@ -1,5 +1,4 @@
-import random
-import collections
+from random import choice
 from connectfour import *
 
 
@@ -19,7 +18,7 @@ def basic_evaluate(board):
 		# (Note that this causes a tie to be treated like a loss.)
 		return -1000
 	score = board.longest_chain(board.get_current_player_id()) * 10
-	# Prefer having your pieces in the center of the board.
+	# Prefer having your pieces in the center of the board
 	for row in xrange(board.board_height):
 		for col in xrange(board.board_width):
 			if board.get_cell(row, col) == board.get_current_player_id():
@@ -30,7 +29,9 @@ def basic_evaluate(board):
 
 
 def new_evaluate(board):
-	# TODO: implement for Assignment 2 Part 2 (20 points)
+	"""
+	TODO: improve this position evaluation function and explain it.
+	"""
 	if board.is_game_over():
 		return -1000
 	my_chain_groups = board.chain_groups(board.get_current_player_id())
@@ -40,7 +41,7 @@ def new_evaluate(board):
 
 
 ##############################################
-# Search functions (and utility functions)
+# Search utility functions
 ##############################################
 
 
@@ -63,7 +64,33 @@ def is_terminal(board):
 	return board.is_game_over()
 
 
-Node = collections.namedtuple('Node', ('score', 'column'))
+##############################################
+# Search functions
+##############################################
+
+
+infinity = float('inf')
+
+
+class Node(object):
+	"""Store a node in a Connect Four game search tree."""
+
+	def __init__(self, score, column=None):
+		"""Initialize this game tree node."""
+		self.score = score
+		self.column = column
+
+	def __str__(self):
+		"""Return a printable string representation of this node."""
+		return 'Node(%s, %d)' % (str(self.score), self.column)
+	
+	def __repr__(self):
+		"""Return a string representation of this node."""
+		return str(self)
+
+	def __cmp__(self, other):
+		"""Return the comparison of this node with another one (1, 0, or -1)."""
+		return cmp(self.score, other.score) or cmp(self.column, other.column)
 
 
 def minimax(board, depth,
@@ -71,16 +98,9 @@ def minimax(board, depth,
 	get_next_moves_fn=get_all_next_moves,
 	is_terminal_fn=is_terminal):
 	"""
-	Do a minimax search to the specified depth on the specified board.
+	Do a minimax search on the specified board to the specified depth.
 	Return the column that the search finds to add a token to.
-
-	board: the ConnectFourBoard instance to evaluate
-	depth: the depth of the search tree (measured in maximum distance
-	       from a leaf to the root)
-	eval_fn: (optional) the evaluation function to use to give a value
-	         to a leaf of the tree
 	"""
-	# TODO: implement for Assignment 2 Part 1 (20 points)
 	node = minimax_helper(board, depth,
 		eval_fn, get_next_moves_fn, is_terminal_fn)
 	return node.column
@@ -88,61 +108,58 @@ def minimax(board, depth,
 
 def minimax_helper(board, depth,
 	eval_fn, get_next_moves_fn, is_terminal_fn):
+	"""
+	Do a recursive minimax search on the specified board to the specified depth.
+	Return the node with the best score and the corresponding column move.
+	
+	Since Connect Four is a zero-sum game, taking the minimum score on alternate
+	levels of the search tree can be replaced by taking the maximum of the
+	negated scores. This variant of minimax is called negamax.
+	"""
 	if depth <= 0 or is_terminal_fn(board):
-		return Node(-eval_fn(board), None)
-	child_nodes = []
+		return Node(-eval_fn(board))
+	best_node = Node(-infinity)
 	for column, new_board in get_next_moves_fn(board):
 		child_node = minimax_helper(new_board, depth - 1,
 			eval_fn, get_next_moves_fn, is_terminal_fn)
-		child_nodes.append(Node(child_node.score, column))
-	max_child_node = max(child_nodes, key=lambda c: c.score)
-	return Node(-max_child_node.score, max_child_node.column)
-
-
-infinity = float('inf')
+		if child_node.score > best_node.score:
+			best_node = Node(child_node.score, column)
+	return Node(-best_node.score, best_node.column)
 
 
 def alpha_beta_search(board, depth,
 	eval_fn=new_evaluate,
 	get_next_moves_fn=get_all_next_moves,
 	is_terminal_fn=is_terminal):
-	# TODO: implement for Assignment 2 Part 3 (30 points)
-	node = alpha_beta_helper(board, depth,
-		Node(-infinity, None), Node(infinity, None), True,
+	"""
+	Do a minimax search with alpha-beta pruning on the specified board
+	to the specified depth.
+	Return the column that the search finds to add a token to.
+	"""
+	node = alpha_beta_helper(board, depth, -infinity, infinity,
 		eval_fn, get_next_moves_fn, is_terminal_fn)
 	return node.column
 
 
-def alpha_beta_helper(board, depth, alpha, beta, is_max,
+def alpha_beta_helper(board, depth, alpha, beta,
 	eval_fn, get_next_moves_fn, is_terminal_fn):
-	print 'alpha', alpha, 'beta', beta
+	"""
+	Do a recursive minimax search with alpha-beta pruning on the specified board
+	to the specified depth.
+	Return the column that the search finds to add a token to.
+	"""
 	if depth <= 0 or is_terminal_fn(board):
-		return Node(-eval_fn(board), None)
-	if is_max:
-		v = Node(-infinity, None)
-		for column, new_board in get_next_moves_fn(board):
-			child_node = alpha_beta_helper(new_board, depth - 1,
-				alpha, beta, False, eval_fn, get_next_moves_fn, is_terminal_fn)
-			print 'child_node', child_node
-			v = Node(max(v.score, child_node.score), column)
-			print 'v', v
-			alpha = max(alpha, v)
-			print 'alpha', alpha
-			if beta.score <= alpha.score:
-				break
-	else:
-		v = Node(infinity, None)
-		for column, new_board in get_next_moves_fn(board):
-			child_node = alpha_beta_helper(new_board, depth - 1,
-				alpha, beta, True, eval_fn, get_next_moves_fn, is_terminal_fn)
-			print 'child_node', child_node
-			v = Node(min(v.score, child_node.score), column)
-			print 'v', v
-			beta = min(beta, v)
-			print 'beta', beta
-			if beta.score <= alpha.score:
-				break
-	return Node(-v.score, v.column)
+		return Node(-eval_fn(board))
+	best_node = Node(-infinity)
+	for column, new_board in get_next_moves_fn(board):
+		child_node = alpha_beta_helper(new_board, depth - 1, -beta, -alpha,
+			eval_fn, get_next_moves_fn, is_terminal_fn)
+		if child_node.score > best_node.score:
+			best_node = Node(child_node.score, column)
+		alpha = max(alpha, best_node.score)
+		if alpha >= beta:
+			break
+	return Node(-best_node.score, best_node.column)
 
 
 ##############################################
@@ -169,7 +186,7 @@ def human_player(board):
 
 def random_player(board):
 	"""A Connect Four player callback that picks a column at random."""
-	return random.choice([move for move, new_board in get_all_next_moves(board)])
+	return choice([move for move, new_board in get_all_next_moves(board)])
 
 
 def basic_player(board):
