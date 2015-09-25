@@ -1,6 +1,8 @@
 import random
 import connectfour
 
+Infinity = float('inf')
+
 
 ##############################################
 # Evaluation functions
@@ -14,9 +16,9 @@ def basic_evaluate(board):
 	if board.is_game_over():
 		# If the game has been won, we know that it must have been won or ended
 		# by the previous move. The previous move was made by our opponent.
-		# Therefore, we can't have won, so return -1000.
+		# Therefore, we can't have won, so return -Infinity.
 		# (Note that this causes a tie to be treated like a loss.)
-		return -1000
+		return -Infinity
 	score = board.longest_chain(board.get_current_player_id()) * 10
 	# Prefer having your pieces in the center of the board
 	for row in xrange(board.board_height):
@@ -33,7 +35,7 @@ def new_evaluate(board):
 	TODO: improve this position evaluation function and explain it.
 	"""
 	if board.is_game_over():
-		return -1000
+		return -Infinity
 	my_chain_groups = board.chain_groups(board.get_current_player_id())
 	other_chain_groups = board.chain_groups(board.get_opposite_player_id())
 	return (sum(v * 2**k for k, v in my_chain_groups.items()) -
@@ -67,9 +69,6 @@ def is_terminal(board):
 ##############################################
 # Search functions
 ##############################################
-
-
-Infinity = float('inf')
 
 
 class Node(object):
