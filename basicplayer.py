@@ -88,9 +88,13 @@ class Node(object):
 		"""Return a string representation of this node."""
 		return str(self)
 
+	def __neg__(self):
+		"""Return this node with a negated score."""
+		return Node(-self.score, self.column)
+
 	def __cmp__(self, other):
 		"""Return the comparison of this node with another one (1, 0, or -1)."""
-		return cmp(self.score, other.score) or cmp(self.column, other.column)
+		return cmp(self.score, other.score)
 
 
 minimax_nodesExpanded = 0
@@ -132,9 +136,9 @@ def minimax_helper(board, depth, increment,
 	for column, new_board in get_next_moves_fn(board):
 		child_node = minimax_helper(new_board, depth - 1, increment,
 			eval_fn, get_next_moves_fn, is_terminal_fn)
-		if child_node.score > best_node.score:
+		if child_node > best_node:
 			best_node = Node(child_node.score, column)
-	return Node(-best_node.score, best_node.column)
+	return -best_node
 
 
 alpha_beta_nodesExpanded = 0
@@ -174,12 +178,12 @@ def alpha_beta_helper(board, depth, increment, alpha, beta,
 	for column, new_board in get_next_moves_fn(board):
 		child_node = alpha_beta_helper(new_board, depth - 1, increment,
 			-beta, -alpha, eval_fn, get_next_moves_fn, is_terminal_fn)
-		if child_node.score > best_node.score:
+		if child_node > best_node:
 			best_node = Node(child_node.score, column)
 		alpha = max(alpha, best_node.score)
 		if alpha >= beta:
 			break
-	return Node(-best_node.score, best_node.column)
+	return -best_node
 
 
 ##############################################
