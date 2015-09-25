@@ -3,35 +3,33 @@
 # Email: remy.oukaour@gmail.com, swordyoung@gmail.com
 
 import time
-from connectfour import *
-from basicplayer import *
+import connectfour
+import basicplayer
 
 
 def run_game(player1, player2, board=None, verbose=True):
 	"""Run a game of Connect Four with the two specified players."""
-	game = ConnectFourRunner(player1, player2, board)
+	game = connectfour.ConnectFourRunner(player1, player2, board)
 	return game.run_game(verbose)
 
 
 if __name__ == '__main__':
 
 	# New vs. Basic
-	minimax_nodesExpanded = 0
 	tick = time.clock()
-	run_game(new_player, basic_player)
+	run_game(basicplayer.new_player, basicplayer.basic_player)
 	tock = time.clock()
 	executionTime = tock - tick
 	print "New vs. Basic:"
 	print "Execution Time:", executionTime
-	print "Nodes Expanded:", minimax_nodesExpanded
+	print "Nodes Expanded:", basicplayer.minimax_nodesExpanded
 	print
 
 	# Alpha-Beta vs. Basic
-	alpha_beta_nodesExpanded = 0
 	tick = time.clock()
-	run_game(alpha_beta_player, basic_player)
+	run_game(basicplayer.alpha_beta_player, basicplayer.basic_player)
 	tock = time.clock()
 	executionTime = tock - tick
 	print "Alpha-Beta vs. Basic:"
 	print "Execution Time:", executionTime
-	print "Nodes Expanded:", alpha_beta_nodesExpanded
+	print "Nodes Expanded:", basicplayer.alpha_beta_nodesExpanded

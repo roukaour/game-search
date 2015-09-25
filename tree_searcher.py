@@ -1,5 +1,7 @@
-#from lab3 import minimax as search
-from lab3 import alpha_beta_search as search
+import lab3
+
+search = lab3.basicplayer.alpha_beta_search # or minimax
+
 
 class Node(object):
 	"""

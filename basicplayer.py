@@ -1,5 +1,5 @@
-from random import choice
-from connectfour import *
+import random
+import connectfour
 
 
 ##############################################
@@ -53,7 +53,7 @@ def get_all_next_moves(board):
 	for column in xrange(board.board_width):
 		try:
 			yield (column, board.do_move(column))
-		except InvalidMoveException:
+		except connectfour.InvalidMoveException:
 			pass
 
 
@@ -206,7 +206,7 @@ def human_player(board):
 
 def random_player(board):
 	"""A Connect Four player callback that picks a column at random."""
-	return choice([move for move, new_board in get_all_next_moves(board)])
+	return random.choice([move for move, new_board in get_all_next_moves(board)])
 
 
 def basic_player(board):
