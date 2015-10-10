@@ -126,8 +126,9 @@ the column to move to reach that node. We created a simple \(Node\) class that
 stores both of these pieces of data.
 
 \subsection{New evaluation function}
-
-TODO
+The new evaluation function is based on the possible win chunks. A possible win chunk is a continuous 4 (or $k$ for Connect K) slots in a line with only one player's pieces or empty, and the line should be vertical, horizontal or diagonal. \\
+A possible win chunk is scored based on the number of the player's pieces in this chunk. As a straightforward intuition, more pieces much higher chances to win a game. So we use exponential function with base 2 to score such a chunk: a chunk with $n$ pieces has the score $2^n$. \\
+The summation of all possible win chunks for one player, is the player's new evaluation function result.
 
 \subsection{Alpha-beta pruning}
 
