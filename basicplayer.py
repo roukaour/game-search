@@ -34,7 +34,11 @@ def basic_evaluate(board):
 def new_evaluate(board):
 	"""
 	'eval_fn' for game boards.
-	TODO: improve this position evaluation function and explain it.
+
+	Return the difference between the sum of the current player's "possible
+	win chunks" and their opponent's sum. A possible win chunk is a consecutive
+	series of K cells which are either empty or belong to the player. In other
+	words, a chunk is capable of turning into a winning chain for that player.
 	"""
 	if board.is_game_over():
 		return -Infinity
@@ -42,14 +46,6 @@ def new_evaluate(board):
 	other_chain_groups = board.chain_groups(board.get_opposite_player_id())
 	return (sum(v * 2**k for k, v in my_chain_groups.items()) -
 		sum(v * 2**k for k, v in other_chain_groups.items()))
-
-
-def longest_streak_evaluate(board):
-	"""
-	'eval_fn' for game boards.
-	TODO: write this function.
-	"""
-	raise NotImplementedError
 
 
 ##############################################

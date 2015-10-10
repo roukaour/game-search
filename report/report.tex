@@ -126,9 +126,19 @@ the column to move to reach that node. We created a simple \(Node\) class that
 stores both of these pieces of data.
 
 \subsection{New evaluation function}
-The new evaluation function is based on the possible win chunks. A possible win chunk is a continuous 4 (or $k$ for Connect K) slots in a line with only one player's pieces or empty, and the line should be vertical, horizontal or diagonal. \\
-A possible win chunk is scored based on the number of the player's pieces in this chunk. As a straightforward intuition, more pieces much higher chances to win a game. So we use exponential function with base 2 to score such a chunk: a chunk with $n$ pieces has the score $2^n$. \\
-The summation of all possible win chunks for one player, is the player's new evaluation function result.
+
+The new evaluation function is based on the concept of a ``possible win chunk'':
+a consecutive series of four cells (or $k$ for Connect K) which all either belong
+to a single player or are empty. In other words, a chunk is capable of turning
+into a winning chain for that player. A player's position evaluation is the sum
+of the scores of all their possible win chunks, minus the sum of the scores of
+all their opponent's chunks.
+
+Each possible win chunk is scored based on the number of the player's pieces in
+that chunk, since intuitively having more pieces already in play makes it more
+likely for the player to complete the chunk and win the game. We use an
+exponential function to weight the score: a chunk with $n$ pieces has the score
+$2^n$.
 
 \subsection{Alpha-beta pruning}
 
@@ -254,9 +264,29 @@ of \(self.\_longest\_streak\_to\_win\) to the child board.
 
 \section{Results}
 
-\subsection{Test cases}
-
 \subsection{Benchmarks}
+
+We tested our algorithms with three players: \(basic\_player\), which uses
+minimax with the original focused-evaluate function; \(new\_player\), which
+uses minimax with the new chunk-based function; and \(alpha\_beta\_player\),
+which is like \(new\_player\) but with alpha-beta pruning. All three players
+search to a depth of 4 plies.
+
+We tested \(new\_player\) and \(alpha\_beta\_player\) against \(basic\_player\).
+The results were:\\
+
+\noindent
+New vs. Basic:\\
+Execution Time: 21.734\\
+Nodes Expanded: 19053\\
+
+\noindent
+Alpha-Beta vs. Basic:\\
+Execution Time: 10.766\\
+Nodes Expanded: 4810\\
+
+We observe that alpha-beta pruning expanded 25\% as many nodes as unoptimized
+minimax search.
 
 \subsection{Connect K}
 
@@ -264,14 +294,12 @@ Playing a game with different values of \(chain\_length\_goal\) behaves as
 expected. At 3, it is easier to win; at 5, it is harder. Winning at 2 is
 trivial, and at 6 or 7 is barely possible (with a cooperative opponent).
 At 1, the player to move first wins instantly, and at 8 or beyond, every game
-is a tie.
+is a tie, since the board itself is only 6 cells by 7.
 
 \subsection{Longest-streak-to-win}
 
 Playing a game in longest-streak-to-win mode also behaves as expected. Each
 player gets to place 10 tokens, and then the player with the longest chain
 of tokens wins, or there is a tie if they have equally long chains.
-
-\section{Conclusion}
 
 \end{document}
