@@ -197,7 +197,7 @@ class ConnectFourBoard(object):
 		return 0 not in self._board_array[0]
 
 	def chain_groups(self, player_id):
-		result = {x: 0 for x in xrange(1, self._chain_length_goal)}
+		result = {x: 0 for x in xrange(1, self._chain_length_goal + 1)}
 		for row in range(self.board_height):
 			for col in range(self.board_width):
 				for dir in [(1, 0), (0, 1), (1, 1), (1, -1)]:
